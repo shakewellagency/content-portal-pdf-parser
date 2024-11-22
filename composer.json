@@ -15,7 +15,9 @@
         }
     ],
     "require": {
-        "php": "^8.1"
+        "php": "^8.1",
+        "illuminate/database": "^11.33",
+        "illuminate/support": "^11.33"
     },
     "require-dev": {
         "pestphp/pest": "^2.20",
@@ -32,9 +34,16 @@
             "Shakewellagency\\ContentPortalPdfParser\\Tests\\": "tests"
         }
     },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Shakewellagency\\ContentPortalPdfParser\\ServiceProviders\\ParserServiceProvider"
+            ]
+        }
+    },
     "scripts": {
         "test": "vendor/bin/pest",
-            "test-coverage": "vendor/bin/pest --coverage",
+        "test-coverage": "vendor/bin/pest --coverage",
         "format": "vendor/bin/pint"
     },
     "config": {
