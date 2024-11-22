@@ -1,12 +1,14 @@
 <?php
 
-use Shakewellagency\ContentPortalPdfParser\Enums\RenditionStatusEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Shakewellagency\ContentPortalPdfParser\Enums\RenditionStatusEnum;
 
-class CreateRenditionsTable extends Migration
+return new class extends Migration
 {
+
+
     /**
      * Run the migrations.
      *
@@ -42,4 +44,4 @@ class CreateRenditionsTable extends Migration
     {
         Schema::dropIfExists('rendition_assets');
     }
-}
+};

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateVersionsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -35,7 +35,7 @@ class CreateVersionsTable extends Migration
             $table->boolean('new_badge')->default(0);
             $table->longtext('preview_token')->nullable();
             $table->longtext('approved_token')->nullable();
-            $table->unsignedBigInteger('approved_by'); 
+            $table->unsignedBigInteger('approved_by')->nullable(); 
             $table->foreign('approved_by')
                 ->references('id')  
                 ->on('users') 
@@ -54,4 +54,4 @@ class CreateVersionsTable extends Migration
     {
         Schema::dropIfExists('versions');
     }
-}
+};
