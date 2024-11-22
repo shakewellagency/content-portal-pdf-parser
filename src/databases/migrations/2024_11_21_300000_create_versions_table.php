@@ -29,6 +29,7 @@ return new class extends Migration
             $table->timestamp('started_at')->nullable();
             $table->timestamp('ended_at')->nullable();
             $table->timestamp('scheduled_at')->nullable();
+            $table->timestamp('issue_at')->nullable();
             $table->boolean('approved')->default(0);
             $table->boolean('archived')->default(0);
             $table->boolean('is_current')->default(0);

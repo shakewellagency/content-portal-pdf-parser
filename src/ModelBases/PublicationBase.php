@@ -1,6 +1,6 @@
 <?php
 
-namespace Shakewellagency\ContentPortalPdfParser\Bases;
+namespace Shakewellagency\ContentPortalPdfParser\ModelBases;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -16,7 +16,7 @@ abstract class PublicationBase extends Model
         'slug',
         'description',
         'type',
-        'issue_at',
+        'doc_type'.
         'link',
         'new_badge',
         'cover_image',

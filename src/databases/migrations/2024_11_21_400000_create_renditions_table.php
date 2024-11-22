@@ -15,11 +15,11 @@ return new class extends Migration
     {
         Schema::create('renditions', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('version_id'); 
+            $table->unsignedBigInteger('version_id')->nullable(); 
             $table->foreign('version_id')
                 ->references('id')  
                 ->on('versions') 
-                ->onDelete('cascade'); 
+                ->onDelete('set null'); 
             $table->unsignedBigInteger('package_id'); 
             $table->foreign('package_id')
                 ->references('id')  

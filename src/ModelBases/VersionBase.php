@@ -1,6 +1,6 @@
 <?php
 
-namespace Shakewellagency\ContentPortalPdfParser\Bases;
+namespace Shakewellagency\ContentPortalPdfParser\ModelBases;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -21,6 +21,7 @@ abstract class VersionBase extends Model
         'started_at',
         'ended_at',
         'scheduled_at',
+        'issue_at',
         'approved',
         'archived',
         'is_current',

@@ -27,6 +27,7 @@ return new class extends Migration
             $table->text('file_path')->nullable();
             $table->text('request_ip')->nullable();
             $table->text('parser_version')->nullable();
+            $table->integer('total_pages')->nullable();
             $table->unsignedBigInteger('initiated_by')->nullable(); 
             $table->foreign('initiated_by')
                 ->references('id')  

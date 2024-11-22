@@ -1,20 +1,21 @@
 <?php
 
-namespace Shakewellagency\ContentPortalPdfParser\Bases;
+namespace Shakewellagency\ContentPortalPdfParser\ModelBases;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-abstract class RenditionAssetBase extends Model
+abstract class RenditionPageBase extends Model
 {
     use SoftDeletes;
-    protected $table = 'rendition_assets';
+    protected $table = 'rendition_pages';
 
     protected $fillable = [
         'rendition_id', 
-        'type',
-        'file_name',
-        'file_path',
+        'slug',
+        'page_no',
+        'content',
+        'is_parsed',
         'created_at',
         'updated_at',
     ];

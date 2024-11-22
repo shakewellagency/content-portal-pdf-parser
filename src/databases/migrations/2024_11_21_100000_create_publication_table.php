@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('slug');
             $table->longText('description')->nullable();
             $table->string('type')->nullable();
-            $table->timestamp('issue_at')->nullable();
+            $table->string('doc_type')->nullable();
             $table->text('link')->nullable();
             $table->boolean('new_badge')->default(0);
             $table->string('cover_image')->nullable();
