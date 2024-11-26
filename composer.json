@@ -16,8 +16,7 @@
     ],
     "require": {
         "php": "^8.1",
-        "illuminate/database": "^11.33",
-        "illuminate/support": "^11.33"
+        "laravel/framework": "^11.9"
     },
     "require-dev": {
         "pestphp/pest": "^2.20",

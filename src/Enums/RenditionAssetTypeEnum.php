@@ -2,7 +2,7 @@
 
 namespace Shakewellagency\ContentPortalPdfParser\Enums;
 
-enum RenditionStatusEnum: string
+enum RenditionAssetTypeEnum: string
 {
     use MethodsTrait;
 
