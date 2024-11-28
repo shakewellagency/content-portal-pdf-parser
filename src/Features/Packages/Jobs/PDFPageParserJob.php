@@ -1,0 +1,90 @@
+<?php
+
+namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Jobs;
+
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\PDFPageParserAction;
+use Shakewellagency\ContentPortalPdfParser\Features\RenditionPages\Actions\CreateRenditionPageAction;
+use Carbon\Carbon;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Shakewellagency\ContentPortalPdfParser\Enums\PackageStatusEnum;
+use Illuminate\Support\Facades\Log;
+
+class PDFPageParserJob implements ShouldQueue
+{
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+
+    public int $timeout = 7200;
+    protected $page;
+    protected $totalPage;
+    protected $package;
+    protected $rendition;
+    protected $parserFile;
+
+    /**
+     * Create a new job instance.
+     */
+    public function __construct(
+        $page, 
+        $totalPage, 
+        $package,
+        $rendition, 
+        $parserFile
+    ){
+        $this->package = $package;
+        $this->page = $page;
+        $this->totalPage = $totalPage;
+        $this->rendition = $rendition;
+        $this->parserFile = $parserFile;
+    }
+
+    /**
+     * Execute the job.
+     */
+    public function handle()
+    {
+        $renditionPage = $this->createRenditionPage();
+        $renditionPage = (new PDFPageParserAction)->execute(
+            $this->page,
+            $this->parserFile,
+            $renditionPage,
+            $this->package,
+        );
+
+
+        if ($this->page == 1) {
+            InitialPageParserJob::dispatch(
+                $this->package, 
+                $renditionPage, 
+                $this->rendition
+            );
+        }
+
+
+        if ($this->package->total_pages == $this->page) {
+            $this->package->finished_at = Carbon::now();
+            $this->package->status = PackageStatusEnum::Finished->value;
+            $this->package->save();
+            Log::info("DONE Parsing Package: {$this->package->id}");
+            unlink($this->parserFile);
+        }
+
+        Log::info("DONE Parsing page: {$this->page}");
+    }
+
+    private function createRenditionPage()
+    {
+        $parameter = [
+            'page_no' => $this->page,
+            'rendition_id' => $this->rendition->id,
+        ];
+        
+        return (new CreateRenditionPageAction)->execute($parameter);
+    }
+}
