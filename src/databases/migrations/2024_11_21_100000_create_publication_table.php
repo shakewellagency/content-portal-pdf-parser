@@ -23,7 +23,6 @@ return new class extends Migration
             $table->string('doc_type')->nullable();
             $table->text('link')->nullable();
             $table->boolean('new_badge')->default(0);
-            $table->string('cover_image')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

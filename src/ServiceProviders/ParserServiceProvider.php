@@ -44,8 +44,11 @@ class ParserServiceProvider extends ServiceProvider
     {
         if (file_exists($filePath)) {
             $content = file_get_contents($filePath);
-            $content = str_replace("namespace {$oldNamespace};", "namespace {$newNamespace};", $content);
-            file_put_contents($filePath, $content);
+    
+            if (strpos($content, "namespace {$oldNamespace};") !== false) {
+                $content = str_replace("namespace {$oldNamespace};", "namespace {$newNamespace};", $content);
+                file_put_contents($filePath, $content); 
+            }
         }
     }
 }

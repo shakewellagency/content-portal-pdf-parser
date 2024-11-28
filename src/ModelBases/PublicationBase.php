@@ -19,7 +19,6 @@ abstract class PublicationBase extends Model
         'doc_type'.
         'link',
         'new_badge',
-        'cover_image',
         'created_at',
         'updated_at',
         'deleted_at',

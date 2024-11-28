@@ -38,6 +38,8 @@ class PackageInitializationJob implements ShouldQueue
     {
         //TODO: remove this
         (new UnlinkTempFileAction)->execute();
+        //---- remove this
+        
         $this->package->status = PackageStatusEnum::Processing->value;
         $this->package->save();
 

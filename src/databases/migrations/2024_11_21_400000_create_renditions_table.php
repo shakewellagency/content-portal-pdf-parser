@@ -28,6 +28,7 @@ return new class extends Migration
             $table->text('type')->nullable();
             $table->longText('summary')->nullable();;
             $table->json('outline')->nullable();
+            $table->text('cover_photo_path')->nullable();
             $table->boolean('is_parsed')->default(0);
             $table->timestamps();
             $table->softDeletes();

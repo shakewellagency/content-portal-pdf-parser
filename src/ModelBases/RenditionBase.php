@@ -17,6 +17,7 @@ abstract class RenditionBase extends Model
         'type',
         'summary',
         'outline',
+        'cover_photo_path',
         'is_parsed',
         'created_at',
         'updated_at',
