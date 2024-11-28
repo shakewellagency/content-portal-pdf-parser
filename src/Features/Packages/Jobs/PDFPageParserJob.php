@@ -12,6 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Shakewellagency\ContentPortalPdfParser\Enums\PackageStatusEnum;
 use Illuminate\Support\Facades\Log;
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInitializes\GetS3ParserFileTempAction;
 
 class PDFPageParserJob implements ShouldQueue
 {
@@ -50,9 +51,11 @@ class PDFPageParserJob implements ShouldQueue
     public function handle()
     {
         $renditionPage = $this->createRenditionPage();
+        $parserFile = (new GetS3ParserFileTempAction)->execute($this->package);
+
         $renditionPage = (new PDFPageParserAction)->execute(
             $this->page,
-            $this->parserFile,
+            $parserFile,
             $renditionPage,
             $this->package,
         );
@@ -74,7 +77,8 @@ class PDFPageParserJob implements ShouldQueue
             Log::info("DONE Parsing Package: {$this->package->id}");
             unlink($this->parserFile);
         }
-
+        
+        unlink($parserFile);
         Log::info("DONE Parsing page: {$this->page}");
     }
 
