@@ -43,7 +43,7 @@ class CoverPhotoAction
             ]);
         }
 
-        $s3FilePath = "{$package->hash}/assets/cover-photo.png";
+        $s3FilePath = "{$package->hash}/assets/cover-photo.jpg";
 
         Storage::disk('s3temp')->put($s3FilePath, file_get_contents($imagePath));
   
