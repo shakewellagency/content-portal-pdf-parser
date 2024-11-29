@@ -51,6 +51,7 @@ class PDFPageParserJob implements ShouldQueue
     public function handle()
     {
         $renditionPage = $this->createRenditionPage();
+        //TODO: have a config when local remove this when deployed add this
         $parserFile = (new GetS3ParserFileTempAction)->execute($this->package);
 
         $renditionPage = (new PDFPageParserAction)->execute(
@@ -59,7 +60,6 @@ class PDFPageParserJob implements ShouldQueue
             $renditionPage,
             $this->package,
         );
-
 
         if ($this->page == 1) {
             InitialPageParserJob::dispatch(
@@ -78,7 +78,7 @@ class PDFPageParserJob implements ShouldQueue
             unlink($this->parserFile);
         }
         
-        unlink($parserFile);
+        // unlink($parserFile);
         Log::info("DONE Parsing page: {$this->page}");
     }
 
