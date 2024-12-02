@@ -22,8 +22,7 @@ class OutlineParseAction
             $ulContent = null; 
         }
 
-        $ulContent = $this->linkOutlineParser($ulContent, $rendition);
-        $rendition->outline = json_encode($ulContent);
+        $rendition->outline = $this->linkOutlineParser($ulContent, $rendition);
         $rendition->save();
         $rendition->refresh();
 
@@ -35,6 +34,10 @@ class OutlineParseAction
 
     private function linkOutlineParser($htmlString, $rendition) 
     {
+        if(!$htmlString) {
+            return null;
+        }
+        
         $dom = new \DOMDocument();
         libxml_use_internal_errors(true); // Suppress warnings for invalid HTML
         $dom->loadHTML($htmlString, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
@@ -49,10 +52,11 @@ class OutlineParseAction
                 $newHref = "rendition/{$rendition->id}/rendition-page/{$number}"; // Generate the new href
                 $link->setAttribute('href', $newHref); // Set the new href
             }
-        }
+        }   
 
-        // Get the updated HTML
-        return $dom->saveHTML();
+        $outline = $dom->saveHTML();
+
+        return json_encode($outline);
     }
 
 }

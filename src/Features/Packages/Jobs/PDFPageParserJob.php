@@ -77,10 +77,10 @@ class PDFPageParserJob implements ShouldQueue
             $this->package->status = PackageStatusEnum::Finished->value;
             $this->package->save();
             Log::info("DONE Parsing Package: {$this->package->id}");
-            unlink($this->parserFile);
         }
         
         unlink($parserFile);
+        
         Log::info("DONE Parsing page: {$this->page}");
     }
 
