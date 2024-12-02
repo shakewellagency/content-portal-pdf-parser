@@ -8,7 +8,7 @@ class GenerateHashAction
 {
     public function execute($package)
     {
-        $fileContent = Storage::disk('s3temp')->get($package->file_path);
+        $fileContent = Storage::disk(config('shakewell-parser.s3'))->get($package->file_path);
         $hash = hash('sha1', $fileContent);
 
         $package->hash = $hash;

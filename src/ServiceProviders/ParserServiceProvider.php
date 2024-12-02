@@ -17,8 +17,8 @@ class ParserServiceProvider extends ServiceProvider
             __DIR__.'/../databases/migrations' => database_path('migrations'),
             __DIR__.'/../Enums' => app_path('Enums'),
             __DIR__.'/../Models' => app_path('Models'),
+            __DIR__ . '/../config/shakewell-parser.php' => config_path('shakewell-parser.php'),
         ], 'parser-assets');
-
 
         $this->modifyPublishedNamespace(app_path('Enums'), 'Shakewellagency\\ContentPortalPdfParser\\Enums', 'App\\Enums');
         $this->modifyPublishedNamespace(app_path('Models'), 'Shakewellagency\\ContentPortalPdfParser\\Models', 'App\\Models');
