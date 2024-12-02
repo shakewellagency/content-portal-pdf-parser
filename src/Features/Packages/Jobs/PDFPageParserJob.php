@@ -2,6 +2,7 @@
 
 namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Jobs;
 
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\PageAssetDataIdAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\PDFPageParserAction;
 use Shakewellagency\ContentPortalPdfParser\Features\RenditionPages\Actions\CreateRenditionPageAction;
 use Carbon\Carbon;
@@ -69,6 +70,7 @@ class PDFPageParserJob implements ShouldQueue
             );
         }
 
+        (new PageAssetDataIdAction)->execute($renditionPage);
 
         if ($this->package->total_pages == $this->page) {
             $this->package->finished_at = Carbon::now();
@@ -78,7 +80,7 @@ class PDFPageParserJob implements ShouldQueue
             unlink($this->parserFile);
         }
         
-        // unlink($parserFile);
+        unlink($parserFile);
         Log::info("DONE Parsing page: {$this->page}");
     }
 
