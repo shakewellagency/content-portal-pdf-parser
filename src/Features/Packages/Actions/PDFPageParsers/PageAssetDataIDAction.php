@@ -4,7 +4,7 @@ namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPa
 
 use Shakewellagency\ContentPortalPdfParser\Models\RenditionAsset;
 
-class PageAssetDataIdAction
+class PageAssetDataIDAction
 {
     public function execute($renditionPage) {
 
