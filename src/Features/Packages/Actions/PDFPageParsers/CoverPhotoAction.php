@@ -2,11 +2,9 @@
 
 namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers;
 
-use Symfony\Component\Process\Process;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInitializes\GetS3ParserFileTempAction;
+use Imagick;
 
 class CoverPhotoAction
 {
@@ -26,30 +24,21 @@ class CoverPhotoAction
         $imagePath = $tempHtmlPath . '.jpg';
         rename($tempHtmlPath, $imagePath);
 
-        $command = sprintf(
-            'magick -density 300 %s[0] -resize 100%% %s', 
-            escapeshellarg($parserFile),
-            escapeshellarg($imagePath)
-        );
+        $imagick = new Imagick();
+        $imagick->setResolution(300, 300); // Set resolution for high-quality output
+        $imagick->readImage($parserFile.'[0]'); // Read the first page of the PDF
+        $imagick->setImageFormat('jpg');
+        $imagick->writeImage($imagePath);
 
-        exec($command, $output, $returnVar);
-
-        if ($returnVar !== 0) {
-            // Log the error for debugging
-            Log::error('magick command failed', [
-                'command' => $command,
-                'output' => $output,
-                'returnVar' => $returnVar,
-            ]);
-        }
-
+        $imagick->clear();
+        $imagick->destroy();
         $s3FilePath = "{$package->hash}/assets/cover-photo.png";
 
         Storage::disk('s3temp')->put($s3FilePath, file_get_contents($imagePath));
-  
+
         $rendition->cover_photo_path = $s3FilePath;
         $rendition->save();
-
+        
         unlink($imagePath);
 
         return $rendition;
