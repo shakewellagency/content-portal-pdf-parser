@@ -4,6 +4,8 @@ namespace Shakewellagency\ContentPortalPdfParser\ModelBases;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Shakewellagency\ContentPortalPdfParser\Models\Publication;
+use Shakewellagency\ContentPortalPdfParser\Models\Rendition;
 
 abstract class VersionBase extends Model
 {
@@ -32,4 +34,14 @@ abstract class VersionBase extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function publication()
+    {
+        return $this->belongsTo(Publication::class);
+    }
+
+    public function renditions()
+    {
+        return $this->hasMany(Rendition::class);
+    }
 }

@@ -34,7 +34,7 @@ class CoverPhotoAction
         $imagick->destroy();
         $s3FilePath = "{$package->hash}/assets/cover-photo.png";
 
-        Storage::disk('s3temp')->put($s3FilePath, file_get_contents($imagePath));
+        Storage::disk(config('shakewell-parser.s3'))->put($s3FilePath, file_get_contents($imagePath));
 
         $rendition->cover_photo_path = $s3FilePath;
         $rendition->save();

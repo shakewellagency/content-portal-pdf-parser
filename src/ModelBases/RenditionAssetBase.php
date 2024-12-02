@@ -4,6 +4,7 @@ namespace Shakewellagency\ContentPortalPdfParser\ModelBases;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Shakewellagency\ContentPortalPdfParser\Models\Rendition;
 
 abstract class RenditionAssetBase extends Model
 {
@@ -18,4 +19,9 @@ abstract class RenditionAssetBase extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function rendition()
+    {
+        return $this->belongsTo(Rendition::class);
+    }
 }

@@ -9,7 +9,7 @@ class GetS3ParserFileTempAction
     public function execute($package)
     {
 
-        $fileContent = Storage::disk('s3temp')->get($package->file_path);
+        $fileContent = Storage::disk(config('shakewell-parser.s3'))->get($package->file_path);
         $currentTimestamp = now()->timestamp; 
         $tempHtmlPath = tempnam(sys_get_temp_dir(), "parser_file_{$package->hash}_{$currentTimestamp}_");
         $parserFile = $tempHtmlPath . '.'.$package->file_type;

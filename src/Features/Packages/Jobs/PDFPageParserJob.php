@@ -28,6 +28,7 @@ class PDFPageParserJob implements ShouldQueue
     protected $package;
     protected $rendition;
     protected $parserFile;
+    protected $localEnv;
 
     /**
      * Create a new job instance.
@@ -44,6 +45,7 @@ class PDFPageParserJob implements ShouldQueue
         $this->totalPage = $totalPage;
         $this->rendition = $rendition;
         $this->parserFile = $parserFile;
+        $this->localEnv = config('shakewell-parser.env') == 'local';
     }
 
     /**
@@ -52,8 +54,8 @@ class PDFPageParserJob implements ShouldQueue
     public function handle()
     {
         $renditionPage = $this->createRenditionPage();
-        //TODO: have a config when local remove this when deployed add this
-        $parserFile = (new GetS3ParserFileTempAction)->execute($this->package);
+        
+        $parserFile = $this->localEnv ? $this->parserFile : (new GetS3ParserFileTempAction)->execute($this->package);
 
         $renditionPage = (new PDFPageParserAction)->execute(
             $this->page,
@@ -77,9 +79,15 @@ class PDFPageParserJob implements ShouldQueue
             $this->package->status = PackageStatusEnum::Finished->value;
             $this->package->save();
             Log::info("DONE Parsing Package: {$this->package->id}");
+
+            if ($this->localEnv) {
+                unlink($this->parserFile);
+            }
         }
         
-        unlink($parserFile);
+        if (!$this->localEnv) {
+            unlink($parserFile);
+        }
         
         Log::info("DONE Parsing page: {$this->page}");
     }

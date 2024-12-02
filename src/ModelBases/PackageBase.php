@@ -4,6 +4,7 @@ namespace Shakewellagency\ContentPortalPdfParser\ModelBases;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Shakewellagency\ContentPortalPdfParser\Models\Rendition;
 
 abstract class PackageBase extends Model
 {
@@ -24,4 +25,9 @@ abstract class PackageBase extends Model
         'finished_at',
         'failed_exception',
     ];
+
+    public function rendition()
+    {
+        return $this->hasOne(Rendition::class);
+    }
 }
