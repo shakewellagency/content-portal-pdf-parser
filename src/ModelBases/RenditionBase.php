@@ -8,25 +8,20 @@ use Shakewellagency\ContentPortalPdfParser\Models\Package;
 use Shakewellagency\ContentPortalPdfParser\Models\RenditionAsset;
 use Shakewellagency\ContentPortalPdfParser\Models\RenditionPage;
 use Shakewellagency\ContentPortalPdfParser\Models\Version;
+use Shakewellagency\ContentPortalPdfParser\Traits\ModelFillableTrait;
 
 abstract class RenditionBase extends Model
 {
     use SoftDeletes;
+    use ModelFillableTrait;
+
     protected $table = 'renditions';
 
-    protected $fillable = [
-        'rendition_id', 
-        'version_id',
-        'package_id',
-        'type',
-        'summary',
-        'outline',
-        'cover_photo_path',
-        'is_parsed',
+    protected $cast = [
         'created_at',
         'updated_at',
+        'deleted_at'
     ];
-
 
     public function package()
     {
