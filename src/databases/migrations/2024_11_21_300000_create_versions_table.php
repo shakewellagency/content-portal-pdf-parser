@@ -23,8 +23,8 @@ return new class extends Migration
             $table->text('title');
             $table->text('slug');
             $table->longText('description')->nullable();
-            $table->string('type')->nullable();
-            $table->json('system_meta')->nullable();
+            $table->integer('version_no')->nullable();
+            $table->integer('version_type')->nullable();
             $table->json('version_meta')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('ended_at')->nullable();
@@ -34,6 +34,7 @@ return new class extends Migration
             $table->boolean('archived')->default(0);
             $table->boolean('is_current')->default(0);
             $table->boolean('new_badge')->default(0);
+            $table->boolean('is_parsed')->default(0);
             $table->longtext('preview_token')->nullable();
             $table->longtext('approved_token')->nullable();
             $table->unsignedBigInteger('approved_by')->nullable(); 

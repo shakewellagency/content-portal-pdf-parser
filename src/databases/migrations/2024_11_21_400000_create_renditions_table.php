@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Shakewellagency\ContentPortalPdfParser\Enums\RenditionTypeEnum;
 
 return new class extends Migration
 {
@@ -25,7 +26,8 @@ return new class extends Migration
                 ->references('id')  
                 ->on('packages') 
                 ->onDelete('cascade'); 
-            $table->text('type')->nullable();
+            $table->enum('type', RenditionTypeEnum::values())
+                ->default(RenditionTypeEnum::PDF->value);    
             $table->longText('summary')->nullable();;
             $table->json('outline')->nullable();
             $table->text('cover_photo_path')->nullable();

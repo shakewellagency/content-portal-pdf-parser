@@ -27,6 +27,7 @@ class PDFPageParserJob implements ShouldQueue
     protected $totalPage;
     protected $package;
     protected $rendition;
+    protected $version;
     protected $parserFile;
     protected $localEnv;
 
@@ -37,13 +38,13 @@ class PDFPageParserJob implements ShouldQueue
         $page, 
         $totalPage, 
         $package,
-        $rendition, 
         $parserFile
     ){
         $this->package = $package;
         $this->page = $page;
         $this->totalPage = $totalPage;
-        $this->rendition = $rendition;
+        $this->rendition = $package->rendition;
+        $this->version = $this->rendition->version;
         $this->parserFile = $parserFile;
         $this->localEnv = config('shakewell-parser.env') == 'local';
     }
@@ -78,6 +79,11 @@ class PDFPageParserJob implements ShouldQueue
             $this->package->finished_at = Carbon::now();
             $this->package->status = PackageStatusEnum::Finished->value;
             $this->package->save();
+            $this->rendition->is_parsed = true;
+            $this->rendition->save();
+            $this->version->is_parsed = true;
+            $this->version->save();
+            
             Log::info("DONE Parsing Package: {$this->package->id}");
 
             if ($this->localEnv) {
