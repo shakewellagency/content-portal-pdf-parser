@@ -2,13 +2,14 @@
 
 namespace Shakewellagency\ContentPortalPdfParser\Features\Renditions\Actions;
 
-use Shakewellagency\ContentPortalPdfParser\Models\Rendition;
 
 class CreateRenditionAction
 {
     public function execute($parameter)
     {
-        $rendition = new Rendition;
+        $renditionModel = config('shakewell-parser.rendition_model');
+
+        $rendition = new $renditionModel;
 
         return (new UpdateRenditionAction)->execute($rendition, $parameter);
     }

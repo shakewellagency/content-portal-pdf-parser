@@ -2,13 +2,13 @@
 
 namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions;
 
-use Shakewellagency\ContentPortalPdfParser\Models\Package;
-
 class CreatePackageAction
 {
     public function execute($parameter)
     {
-        $package = new Package;
+        $packageModel = config('shakewell-parser.package_model');
+
+        $package = new $packageModel;
 
         return (new UpdatePackageAction)->execute($package, $parameter);
     }

@@ -5,7 +5,6 @@ namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPa
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Shakewellagency\ContentPortalPdfParser\Enums\RenditionAssetTypeEnum;
-use Shakewellagency\ContentPortalPdfParser\Models\RenditionAsset;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Helpers\ContentParserHelper;
 
 class PDFPageParserAction
@@ -65,7 +64,8 @@ class PDFPageParserAction
 
     private function createAsset($renditionId, $fileName, $fileType, $filePath) 
     {
-        $asset = new RenditionAsset;
+        $renditionAssetModel = config('shakewell-parser.rendition_asset_model');
+        $asset = new $renditionAssetModel;
         $asset->rendition_id = $renditionId;
         $asset->type = $fileType;
         $asset->file_name = $fileName;

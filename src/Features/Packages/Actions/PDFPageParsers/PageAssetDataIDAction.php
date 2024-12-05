@@ -2,12 +2,11 @@
 
 namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers;
 
-use Shakewellagency\ContentPortalPdfParser\Models\RenditionAsset;
 
 class PageAssetDataIDAction
 {
-    public function execute($renditionPage) {
-
+    public function execute($renditionPage) 
+    {
         $htmlString = json_decode($renditionPage->content);
         $dom = new \DOMDocument();
         @$dom->loadHTML($htmlString);
@@ -20,7 +19,8 @@ class PageAssetDataIDAction
                 $originalSrc = $matches[1];
             }
 
-            $renditionAsset = RenditionAsset::where('file_name', $originalSrc)->first();
+            $renditionAssetModel = config('shakewell-parser.rendition_asset_model');
+            $renditionAsset = $renditionAssetModel::where('file_name', $originalSrc)->first();
             if ($renditionAsset) {
                 $img->setAttribute('asset-path', $renditionAsset->file_path);
             }
