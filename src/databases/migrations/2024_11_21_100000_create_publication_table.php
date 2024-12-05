@@ -3,6 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Shakewellagency\ContentPortalPdfParser\Enums\PublicationStatusEnum;
+use Shakewellagency\ContentPortalPdfParser\Enums\PublicationTypeEnum;
 
 return new class extends Migration
 {
@@ -19,8 +21,11 @@ return new class extends Migration
             $table->text('title');
             $table->text('slug');
             $table->longText('description')->nullable();
-            $table->string('type')->nullable();
             $table->string('doc_type')->nullable();
+            $table->enum('type', PublicationTypeEnum::values())
+                ->default(PublicationTypeEnum::UploadFile->value);
+            $table->enum('status', PublicationStatusEnum::values())
+                ->default(PublicationStatusEnum::Draft->value);
             $table->text('link')->nullable();
             $table->boolean('new_badge')->default(0);
             $table->timestamps();

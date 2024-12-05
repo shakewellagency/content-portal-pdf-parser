@@ -20,14 +20,16 @@ class PageParserJob implements ShouldQueue
 
     public int $timeout = 7200;
     protected $package;
+    protected $version;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($package)
+    public function __construct($package, $version)
     {
         $package->refresh();
         $this->package = $package;
+        $this->version = $version;
     }
 
     /**
@@ -36,15 +38,15 @@ class PageParserJob implements ShouldQueue
     public function handle()
     {
         $parserFile = (new GetS3ParserFileTempAction)->execute($this->package);
-        $rendition = $this->createRendition();
+        $this->createRendition();
         $totalPages = $this->package->total_pages;
+        
         for ($page = 1; $page <= $totalPages; $page++) {
             Log::debug("Started Parsing Page: {$page} out of {$totalPages}");
             PDFPageParserJob::dispatch(
                 $page, 
                 $totalPages, 
                 $this->package, 
-                $rendition,
                 $parserFile
             );
         }
@@ -53,10 +55,11 @@ class PageParserJob implements ShouldQueue
     private function createRendition()
     {
         $parameter = [
+            'version_id' => $this->version->id,
             'package_id' => $this->package->id,
             'type' => $this->package->file_type,
         ];
-        
+        $this->package->refresh();
         return (new CreateRenditionAction)->execute($parameter);
     }
 }
