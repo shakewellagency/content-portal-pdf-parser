@@ -9,6 +9,7 @@ class PDFParse
 {
     public static function execute($package, $version)
     {
+       
         PackageInitializationJob::withChain([
             new PageParserJob($package, $version),
         ])->dispatch($package, $version);

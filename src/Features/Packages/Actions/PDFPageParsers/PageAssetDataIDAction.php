@@ -19,7 +19,7 @@ class PageAssetDataIDAction
                 $originalSrc = $matches[1];
             }
 
-            $renditionAssetModel = config('shakewell-parser.rendition_asset_model');
+            $renditionAssetModel = config('shakewell-parser.models.rendition_asset_model');
             $renditionAsset = $renditionAssetModel::where('file_name', $originalSrc)->first();
             if ($renditionAsset) {
                 $img->setAttribute('asset-path', $renditionAsset->file_path);

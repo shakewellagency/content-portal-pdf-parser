@@ -4,7 +4,6 @@ namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPa
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Shakewellagency\ContentPortalPdfParser\Enums\RenditionAssetTypeEnum;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Helpers\ContentParserHelper;
 
 class PDFPageParserAction
@@ -52,8 +51,9 @@ class PDFPageParserAction
             $s3Path = "{$package->hash}/assets/{$filename}";
             
             if ($extension != 'html') {
+                $renditionAssetTypeEnum = config('shakewell-parser.enums.rendition_asset_type_enum');
                 Storage::disk(config('shakewell-parser.s3'))->put($s3Path, file_get_contents($file));
-                $this->createAsset($renditionPage->rendition_id, $filename, RenditionAssetTypeEnum::Image->value, $s3Path);
+                $this->createAsset($renditionPage->rendition_id, $filename, $renditionAssetTypeEnum::Image->value, $s3Path);
             }
 
             unlink($file);
@@ -64,7 +64,7 @@ class PDFPageParserAction
 
     private function createAsset($renditionId, $fileName, $fileType, $filePath) 
     {
-        $renditionAssetModel = config('shakewell-parser.rendition_asset_model');
+        $renditionAssetModel = config('shakewell-parser.models.rendition_asset_model');
         $asset = new $renditionAssetModel;
         $asset->rendition_id = $renditionId;
         $asset->type = $fileType;

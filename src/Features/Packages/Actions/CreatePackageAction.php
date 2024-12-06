@@ -6,7 +6,8 @@ class CreatePackageAction
 {
     public function execute($parameter)
     {
-        $packageModel = config('shakewell-parser.package_model');
+
+        $packageModel = config('shakewell-parser.models.package_model');
 
         $package = new $packageModel;
 

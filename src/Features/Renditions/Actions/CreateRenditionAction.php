@@ -7,7 +7,7 @@ class CreateRenditionAction
 {
     public function execute($parameter)
     {
-        $renditionModel = config('shakewell-parser.rendition_model');
+        $renditionModel = config('shakewell-parser.models.rendition_model');
 
         $rendition = new $renditionModel;
 

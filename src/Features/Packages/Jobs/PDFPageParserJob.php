@@ -11,7 +11,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Shakewellagency\ContentPortalPdfParser\Enums\PackageStatusEnum;
 use Illuminate\Support\Facades\Log;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInitializes\GetS3ParserFileTempAction;
 
@@ -76,8 +75,11 @@ class PDFPageParserJob implements ShouldQueue
         (new PageAssetDataIDAction)->execute($renditionPage);
 
         if ($this->package->total_pages == $this->page) {
+
+            $packageStatusEnum = config('shakewell-parser.enums.package_status_enum');
+
             $this->package->finished_at = Carbon::now();
-            $this->package->status = PackageStatusEnum::Finished->value;
+            $this->package->status = $packageStatusEnum::Finished->value;
             $this->package->save();
             $this->rendition->is_parsed = true;
             $this->rendition->save();

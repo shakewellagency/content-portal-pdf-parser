@@ -11,7 +11,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Shakewellagency\ContentPortalPdfParser\Enums\PackageStatusEnum;
 
 class PackageInitializationJob implements ShouldQueue
 {
@@ -39,8 +38,9 @@ class PackageInitializationJob implements ShouldQueue
         //TODO: remove this
         (new UnlinkTempFileAction)->execute();
         //---- remove this
-        
-        $this->package->status = PackageStatusEnum::Processing->value;
+
+        $packageStatusEnum = config('shakewell-parser.enums.package_status_enum');
+        $this->package->status = $packageStatusEnum::Processing->value;
         $this->package->save();
 
         $this->package = (new GenerateHashAction)->execute($this->package);
