@@ -9,7 +9,10 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\FailedPackageAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInitializes\GetS3ParserFileTempAction;
+use Throwable;
+use Illuminate\Support\Facades\Bus;
 
 class PageParserJob implements ShouldQueue
 {
@@ -21,6 +24,7 @@ class PageParserJob implements ShouldQueue
     public int $timeout = 7200;
     protected $package;
     protected $version;
+    protected $rendition;
 
     /**
      * Create a new job instance.
@@ -38,18 +42,26 @@ class PageParserJob implements ShouldQueue
     public function handle()
     {
         $parserFile = (new GetS3ParserFileTempAction)->execute($this->package);
-        $this->createRendition();
+        $this->rendition = $this->createRendition();
+        
+        LoggerInfo('Successfully created rendition', [
+            'package' => $this->package->toArray(),
+            'rendition' => $this->rendition,
+        ]);
+
         $totalPages = $this->package->total_pages;
         
         for ($page = 1; $page <= $totalPages; $page++) {
-            Log::debug("Started Parsing Page: {$page} out of {$totalPages}");
-            PDFPageParserJob::dispatch(
+            $chain[] = new PDFPageParserJob(
                 $page, 
                 $totalPages, 
                 $this->package, 
                 $parserFile
             );
         }
+
+        Bus::chain($chain)->dispatch();
+
     }
 
     private function createRendition()
@@ -61,5 +73,14 @@ class PageParserJob implements ShouldQueue
         ];
         $this->package->refresh();
         return (new CreateRenditionAction)->execute($parameter);
+    }
+
+    public function failed(Throwable $exception)
+    {
+        (new FailedPackageAction)->execute(
+            $this->package, 
+            $this->version, 
+            $exception
+        );
     }
 }

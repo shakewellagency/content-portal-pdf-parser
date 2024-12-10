@@ -4,7 +4,7 @@ namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPa
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Shakewellagency\ContentPortalPdfParser\Enums\RenditionAssetTypeEnum;
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Exceptions\ConversionFailedException;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Helpers\ContentParserHelper;
 
 class PDFPageParserAction
@@ -25,12 +25,13 @@ class PDFPageParserAction
         $command = "pdftohtml -c -hidden -noframes -f {$page} -l {$page} -zoom 1.5 {$parserFile} {$tempHtmlPath}";
         exec($command . ' 2>&1', $output, $return_var);
         
-        Log::info("first command: {$return_var}");
-
         if ($return_var !== 0) {
-            Log::error("conversion failed page: {$page} | pdfpath: {$parserFile} | {$tempHtmlPath}");
             fclose($tempHtmlFile);
-            return;
+            LoggerInfo('Failed to Convert the PDF Page to HTML', [
+                'package' => $package->toArray(),
+                'renditionPage' => $renditionPage,
+            ]);
+            throw new ConversionFailedException('Failed to Convert the PDF Page to HTML');
         }
 
         $tempDirectory = dirname($tempHtml);
@@ -52,19 +53,21 @@ class PDFPageParserAction
             $s3Path = "{$package->hash}/assets/{$filename}";
             
             if ($extension != 'html') {
+                $renditionAssetTypeEnum = config('shakewell-parser.enums.rendition_asset_type_enum');
                 Storage::disk(config('shakewell-parser.s3'))->put($s3Path, file_get_contents($file));
-                $this->createAsset($renditionPage->rendition_id, $filename, RenditionAssetTypeEnum::Image->value, $s3Path);
+                $this->createAsset($renditionPage->rendition_id, $filename, $renditionAssetTypeEnum::Image->value, $s3Path);
             }
 
             unlink($file);
         }
+
         
         return $renditionPage;
     }
 
     private function createAsset($renditionId, $fileName, $fileType, $filePath) 
     {
-        $renditionAssetModel = config('shakewell-parser.rendition_asset_model');
+        $renditionAssetModel = config('shakewell-parser.models.rendition_asset_model');
         $asset = new $renditionAssetModel;
         $asset->rendition_id = $renditionId;
         $asset->type = $fileType;

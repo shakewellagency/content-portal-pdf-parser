@@ -4,6 +4,7 @@ namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Jobs;
 
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\PageAssetDataIDAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\PDFPageParserAction;
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\SetVersionCurrentAction;
 use Shakewellagency\ContentPortalPdfParser\Features\RenditionPages\Actions\CreateRenditionPageAction;
 use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,9 +12,11 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Shakewellagency\ContentPortalPdfParser\Enums\PackageStatusEnum;
 use Illuminate\Support\Facades\Log;
+use Shakewellagency\ContentPortalPdfParser\Events\ParsingFinishedEvent;
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\FailedPackageAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInitializes\GetS3ParserFileTempAction;
+use Throwable;
 
 class PDFPageParserJob implements ShouldQueue
 {
@@ -76,19 +79,7 @@ class PDFPageParserJob implements ShouldQueue
         (new PageAssetDataIDAction)->execute($renditionPage);
 
         if ($this->package->total_pages == $this->page) {
-            $this->package->finished_at = Carbon::now();
-            $this->package->status = PackageStatusEnum::Finished->value;
-            $this->package->save();
-            $this->rendition->is_parsed = true;
-            $this->rendition->save();
-            $this->version->is_parsed = true;
-            $this->version->save();
-            
-            Log::info("DONE Parsing Package: {$this->package->id}");
-
-            if ($this->localEnv) {
-                unlink($this->parserFile);
-            }
+            $this->finisher();
         }
         
         if (!$this->localEnv) {
@@ -106,5 +97,41 @@ class PDFPageParserJob implements ShouldQueue
         ];
         
         return (new CreateRenditionPageAction)->execute($parameter);
+    }
+
+    private function finisher()
+    {
+        
+        $packageStatusEnum = config('shakewell-parser.enums.package_status_enum');
+        $this->package->finished_at = Carbon::now();
+        $this->package->status = $packageStatusEnum::Finished->value;
+        $this->package->save();
+        $this->rendition->is_parsed = true;
+        $this->rendition->save();
+        $this->version->is_parsed = true;
+        $this->version->save();
+
+        (new SetVersionCurrentAction)->execute($this->version, $this->rendition);
+        
+        if ($this->localEnv) {
+            unlink($this->parserFile);
+        }
+
+        LoggerInfo('Successfully parsed the PDF', [
+            'package' => $this->package,
+        ]);
+
+        event(new ParsingFinishedEvent($this->package, $this->version));
+    }
+
+    public function failed(Throwable $exception)
+    {
+        (new FailedPackageAction)->execute(
+            $this->package, 
+            $this->version, 
+            $exception
+        );
+
+        $this->rendition->delete();
     }
 }

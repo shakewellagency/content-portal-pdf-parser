@@ -26,8 +26,6 @@ return new class extends Migration
             $table->integer('version_no')->nullable();
             $table->integer('version_type')->nullable();
             $table->json('version_meta')->nullable();
-            $table->timestamp('started_at')->nullable();
-            $table->timestamp('ended_at')->nullable();
             $table->timestamp('scheduled_at')->nullable();
             $table->timestamp('issue_at')->nullable();
             $table->boolean('approved')->default(0);

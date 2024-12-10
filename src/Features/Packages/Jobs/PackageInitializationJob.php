@@ -2,6 +2,8 @@
 
 namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Jobs;
 
+use Shakewellagency\ContentPortalPdfParser\Events\ParsingFailedEvent;
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\FailedPackageAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInitializes\GenerateHashAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInitializes\GetS3ParserFileTempAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInitializes\PDFPageCounterAction;
@@ -11,7 +13,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Shakewellagency\ContentPortalPdfParser\Enums\PackageStatusEnum;
+use Shakewellagency\ContentPortalPdfParser\Events\ParsingStartedEvent;
+use Throwable;
 
 class PackageInitializationJob implements ShouldQueue
 {
@@ -22,13 +25,15 @@ class PackageInitializationJob implements ShouldQueue
 
     public int $timeout = 7200;
     protected $package;
+    protected $version;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($package)
+    public function __construct($package, $version)
     {
         $this->package = $package;
+        $this->version = $version;
     }
 
     /**
@@ -39,10 +44,13 @@ class PackageInitializationJob implements ShouldQueue
         //TODO: remove this
         (new UnlinkTempFileAction)->execute();
         //---- remove this
-        
-        $this->package->status = PackageStatusEnum::Processing->value;
-        $this->package->save();
 
+        event(new ParsingStartedEvent($this->package, $this->version));
+        
+        $packageStatusEnum = config('shakewell-parser.enums.package_status_enum');
+        $this->package->status = $packageStatusEnum::Processing->value;
+        $this->package->save();
+       
         $this->package = (new GenerateHashAction)->execute($this->package);
         $parserFile = (new GetS3ParserFileTempAction)->execute($this->package);
         $totalPages = (new PDFPageCounterAction)->execute($parserFile);
@@ -50,5 +58,19 @@ class PackageInitializationJob implements ShouldQueue
         $this->package->save();
 
         unlink($parserFile);
+
+        LoggerInfo('Successfully initialized the package', [
+            'package' => $this->package,
+            'version' => $this->version,
+        ]);
+    }
+
+    public function failed(Throwable $exception)
+    {
+        (new FailedPackageAction)->execute(
+            $this->package, 
+            $this->version, 
+            $exception
+        );
     }
 }
