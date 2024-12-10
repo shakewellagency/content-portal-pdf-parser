@@ -13,7 +13,9 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Shakewellagency\ContentPortalPdfParser\Events\ParsingFinishedEvent;
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\FailedPackageAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInitializes\GetS3ParserFileTempAction;
+use Throwable;
 
 class PDFPageParserJob implements ShouldQueue
 {
@@ -114,5 +116,16 @@ class PDFPageParserJob implements ShouldQueue
         }
 
         event(new ParsingFinishedEvent($this->package, $this->version));
+    }
+
+    public function failed(Throwable $exception)
+    {
+        (new FailedPackageAction)->execute(
+            $this->package, 
+            $this->version, 
+            $exception
+        );
+
+        $this->rendition->delete();
     }
 }

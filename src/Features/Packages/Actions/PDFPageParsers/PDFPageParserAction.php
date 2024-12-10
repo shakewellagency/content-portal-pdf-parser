@@ -4,6 +4,7 @@ namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPa
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Exceptions\ConversionFailedException;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Helpers\ContentParserHelper;
 
 class PDFPageParserAction
@@ -24,12 +25,9 @@ class PDFPageParserAction
         $command = "pdftohtml -c -hidden -noframes -f {$page} -l {$page} -zoom 1.5 {$parserFile} {$tempHtmlPath}";
         exec($command . ' 2>&1', $output, $return_var);
         
-        Log::info("first command: {$return_var}");
-
         if ($return_var !== 0) {
-            Log::error("conversion failed page: {$page} | pdfpath: {$parserFile} | {$tempHtmlPath}");
             fclose($tempHtmlFile);
-            return;
+            throw new ConversionFailedException('Failed to Convert the PDF Page to HTML');
         }
 
         $tempDirectory = dirname($tempHtml);

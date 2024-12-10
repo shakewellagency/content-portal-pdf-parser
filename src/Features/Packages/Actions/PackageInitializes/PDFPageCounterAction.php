@@ -2,8 +2,8 @@
 
 namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInitializes;
 
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Exceptions\PageCounterException;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class PDFPageCounterAction
 {
@@ -11,8 +11,9 @@ class PDFPageCounterAction
     {
         $process = new Process(['pdfinfo', $parserFile]);
         $process->run();
+
         if (!$process->isSuccessful()) {
-            throw new ProcessFailedException($process);
+            throw new PageCounterException('A system error occurred while parsing the page count.');
         }
         $output = $process->getOutput();
         preg_match('/Pages:\s+(\d+)/', $output, $matches);

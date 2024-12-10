@@ -15,7 +15,7 @@ class ParsingFailedEvent
     /**
      * Create a new event instance.
      */
-    public function __construct(public $package,public $version)
+    public function __construct(public $package, public $version, public $errorMessage)
     {
         
     }

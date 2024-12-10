@@ -2,6 +2,8 @@
 
 namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Jobs;
 
+use Shakewellagency\ContentPortalPdfParser\Events\ParsingFailedEvent;
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\FailedPackageAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInitializes\GenerateHashAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInitializes\GetS3ParserFileTempAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInitializes\PDFPageCounterAction;
@@ -12,6 +14,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Shakewellagency\ContentPortalPdfParser\Events\ParsingStartedEvent;
+use Throwable;
 
 class PackageInitializationJob implements ShouldQueue
 {
@@ -55,5 +58,14 @@ class PackageInitializationJob implements ShouldQueue
         $this->package->save();
 
         unlink($parserFile);
+    }
+
+    public function failed(Throwable $exception)
+    {
+        (new FailedPackageAction)->execute(
+            $this->package, 
+            $this->version, 
+            $exception
+        );
     }
 }

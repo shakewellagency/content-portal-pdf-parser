@@ -18,8 +18,11 @@ class ParsingFailedMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(public $package, public $version)
-    {
+    public function __construct(
+        public $package, 
+        public $version,
+        public $errorMessage
+    ) {
         
     }  
 
@@ -29,7 +32,7 @@ class ParsingFailedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Request for Access Has Been Processed',
+            subject: 'Your Import has failed',
         );
     }
 
@@ -43,6 +46,11 @@ class ParsingFailedMail extends Mailable
         return new Content(
             markdown: $markdown,
             with: [
+                'publicationNo' => $this->version->publication->publication_no,
+                'versionInfo' => json_decode($this->version->version_meta),
+                'startedDate' => $this->package->started_at,
+                'failedException' => $this->package->failed_exception,
+                'errorMessage' => $this->errorMessage,
             ]
         );
     }

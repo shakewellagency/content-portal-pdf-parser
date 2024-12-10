@@ -37,7 +37,7 @@ class SendEmailNotificationListener
             ParsingTriggerEvent::class => new ParsingTriggerMail($event->package, $event->version),
             ParsingStartedEvent::class => new ParsingStartedMail($event->package, $event->version), 
             ParsingFinishedEvent::class => new ParsingFinishedMail($event->package, $event->version), 
-            ParsingFailedEvent::class => new ParsingFailedMail($event->package, $event->version),
+            ParsingFailedEvent::class => new ParsingFailedMail($event->package, $event->version, $event->errorMessage),
             default => throw new \Exception('Unexpected match value'),
         };
 

@@ -1,17 +1,21 @@
 @extends('mails.PDFParserMail.layouts.base')
 
-@section('title', 'Import Processing')
+@section('title', 'Import Failed')
 
 @section('content')
-    <h1 style="font-size: 22px; color: black;">An Import Process Is About To Start</h1>
+    <h1 style="font-size: 22px; color: black;">Your Import Has Failed</h1>
     <br>
     <p>
-        The Import webhooks has been triggered and a package has been added to the queue to be processed.
+        Import has failed due to: {{$errorMessage}}
     </p>
 
     <p><b>Details</b></p>
     <ul style="text-align: left; color: black;">
-        {{-- <li>Package Name: {{$packageName}}</li>
-        <li>Trigger Date: {{$triggerDate}}</li> --}}
+        <li>Publication No : {{$publicationNo}}</li>
+        @foreach ($versionInfo as $key => $value)
+        <li>{{ Str::headline($key) }}: {{ $value }}</li>
+        @endforeach
+        <li>Import Started Date: {{$startedDate}}</li>
+        <li>System Failed Exception: {{$failedException}}</li>
     </ul>
-@endsection 
+@endsection
