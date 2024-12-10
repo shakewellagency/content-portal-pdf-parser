@@ -27,6 +27,10 @@ class PDFPageParserAction
         
         if ($return_var !== 0) {
             fclose($tempHtmlFile);
+            LoggerInfo('Failed to Convert the PDF Page to HTML', [
+                'package' => $package->toArray(),
+                'renditionPage' => $renditionPage,
+            ]);
             throw new ConversionFailedException('Failed to Convert the PDF Page to HTML');
         }
 
@@ -56,6 +60,7 @@ class PDFPageParserAction
 
             unlink($file);
         }
+
         
         return $renditionPage;
     }

@@ -13,7 +13,6 @@ class PDFParse
     public static function execute($package, $version)
     {
         event(new ParsingTriggerEvent($package, $version));
-
         PackageInitializationJob::withChain([
             new PageParserJob($package, $version),
         ])->dispatch($package, $version);

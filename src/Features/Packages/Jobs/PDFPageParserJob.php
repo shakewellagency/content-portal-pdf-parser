@@ -100,6 +100,7 @@ class PDFPageParserJob implements ShouldQueue
 
     private function finisher()
     {
+        
         $packageStatusEnum = config('shakewell-parser.enums.package_status_enum');
         $this->package->finished_at = Carbon::now();
         $this->package->status = $packageStatusEnum::Finished->value;
@@ -115,6 +116,9 @@ class PDFPageParserJob implements ShouldQueue
             unlink($this->parserFile);
         }
 
+        LoggerInfo('Successfully parsed the PDF', [
+            'package' => $this->package,
+        ]);
         event(new ParsingFinishedEvent($this->package, $this->version));
     }
 

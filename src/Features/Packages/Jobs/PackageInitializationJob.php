@@ -50,7 +50,7 @@ class PackageInitializationJob implements ShouldQueue
         $packageStatusEnum = config('shakewell-parser.enums.package_status_enum');
         $this->package->status = $packageStatusEnum::Processing->value;
         $this->package->save();
-
+       
         $this->package = (new GenerateHashAction)->execute($this->package);
         $parserFile = (new GetS3ParserFileTempAction)->execute($this->package);
         $totalPages = (new PDFPageCounterAction)->execute($parserFile);
@@ -58,6 +58,11 @@ class PackageInitializationJob implements ShouldQueue
         $this->package->save();
 
         unlink($parserFile);
+
+        LoggerInfo('Successfully initialized the package', [
+            'package' => $this->package,
+            'version' => $this->version,
+        ]);
     }
 
     public function failed(Throwable $exception)

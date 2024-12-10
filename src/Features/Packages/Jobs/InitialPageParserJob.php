@@ -44,5 +44,10 @@ class InitialPageParserJob implements ShouldQueue
             $rendition,
             $this->package
         );
+
+        LoggerInfo('Successfully parsed the 1st page for outline and default coverphoto', [
+            'package' => $this->package->toArray(),
+            'renditionPage' => $this->renditionPage,
+        ]);
     }
 }

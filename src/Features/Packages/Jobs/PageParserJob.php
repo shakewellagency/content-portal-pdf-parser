@@ -43,6 +43,12 @@ class PageParserJob implements ShouldQueue
     {
         $parserFile = (new GetS3ParserFileTempAction)->execute($this->package);
         $this->rendition = $this->createRendition();
+        
+        LoggerInfo('Successfully created rendition', [
+            'package' => $this->package->toArray(),
+            'rendition' => $this->rendition,
+        ]);
+
         $totalPages = $this->package->total_pages;
         
         for ($page = 1; $page <= $totalPages; $page++) {

@@ -41,6 +41,13 @@ class ParsingStartedMail extends Mailable
     {
         $markdown = 'mails.PDFParserMail.parsing-started';
 
+        LoggerInfo('Started Mail has been sent', [
+            'package' => $this->package->toArray(),
+            'publicationNo' => $this->version->publication->publication_no,
+            'versionInfo' => json_decode($this->version->version_meta),
+            'startedDate' => $this->package->started_at,
+        ]);
+
         return new Content(
             markdown: $markdown,
             with: [

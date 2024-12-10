@@ -50,6 +50,19 @@ class ParsingFinishedMail extends Mailable
         $scheduleLink = url("/nova/resources/versions/{$this->version->id}/edit");
         
         $markdown = 'mails.PDFParserMail.parsing-finished';
+
+        LoggerInfo('Finished Mail has been sent', [
+            'package' => $this->package->toArray(),
+            'publicationNo' => $publication->publication_no,
+            'versionInfo' => json_decode($this->version->version_meta),
+            'startedDate' => $this->package->started_at,
+            'finishedDate' => $this->package->finished_at,
+            'processTime' => round($minutes, 2),
+            'previewLink' => $previewLink,
+            'approvedLink' => $approvedLink,
+            'scheduleLink' => $scheduleLink,
+        ]);
+
         return new Content(
             markdown: $markdown,
             with: [
