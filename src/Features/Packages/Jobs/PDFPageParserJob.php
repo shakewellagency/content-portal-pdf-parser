@@ -12,6 +12,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Shakewellagency\ContentPortalPdfParser\Events\ParsingFinishedEvent;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInitializes\GetS3ParserFileTempAction;
 
 class PDFPageParserJob implements ShouldQueue
@@ -75,22 +76,7 @@ class PDFPageParserJob implements ShouldQueue
         (new PageAssetDataIDAction)->execute($renditionPage);
 
         if ($this->package->total_pages == $this->page) {
-
-            $packageStatusEnum = config('shakewell-parser.enums.package_status_enum');
-
-            $this->package->finished_at = Carbon::now();
-            $this->package->status = $packageStatusEnum::Finished->value;
-            $this->package->save();
-            $this->rendition->is_parsed = true;
-            $this->rendition->save();
-            $this->version->is_parsed = true;
-            $this->version->save();
-            
-            Log::info("DONE Parsing Package: {$this->package->id}");
-
-            if ($this->localEnv) {
-                unlink($this->parserFile);
-            }
+            $this->finisher();
         }
         
         if (!$this->localEnv) {
@@ -108,5 +94,25 @@ class PDFPageParserJob implements ShouldQueue
         ];
         
         return (new CreateRenditionPageAction)->execute($parameter);
+    }
+
+    private function finisher()
+    {
+        $packageStatusEnum = config('shakewell-parser.enums.package_status_enum');
+        $this->package->finished_at = Carbon::now();
+        $this->package->status = $packageStatusEnum::Finished->value;
+        $this->package->save();
+        $this->rendition->is_parsed = true;
+        $this->rendition->save();
+        $this->version->is_parsed = true;
+        $this->version->save();
+        
+        Log::info("DONE Parsing Package: {$this->package->id}");
+
+        if ($this->localEnv) {
+            unlink($this->parserFile);
+        }
+
+        event(new ParsingFinishedEvent($this->package, $this->version));
     }
 }

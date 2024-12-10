@@ -19,5 +19,6 @@ return [
         'publication_type_enum' => '', //App\Features\Publications\Enums\PublicationTypeEnum::class,
         'rendition_asset_type_enum' => '', //App\Features\Renditions\Enums\RenditionAssetTypeEnum::class,
         'rendition_type_enum' => '', //App\Features\Renditions\Enums\RenditionTypeEnum::class,
-    ]
+    ],
+    'timezone' => 'Australia/Sydney',
 ];

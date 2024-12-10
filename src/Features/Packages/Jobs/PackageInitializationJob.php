@@ -11,6 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Shakewellagency\ContentPortalPdfParser\Events\ParsingStartedEvent;
 
 class PackageInitializationJob implements ShouldQueue
 {
@@ -21,13 +22,15 @@ class PackageInitializationJob implements ShouldQueue
 
     public int $timeout = 7200;
     protected $package;
+    protected $version;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($package)
+    public function __construct($package, $version)
     {
         $this->package = $package;
+        $this->version = $version;
     }
 
     /**
@@ -39,6 +42,8 @@ class PackageInitializationJob implements ShouldQueue
         (new UnlinkTempFileAction)->execute();
         //---- remove this
 
+        event(new ParsingStartedEvent($this->package, $this->version));
+        
         $packageStatusEnum = config('shakewell-parser.enums.package_status_enum');
         $this->package->status = $packageStatusEnum::Processing->value;
         $this->package->save();
