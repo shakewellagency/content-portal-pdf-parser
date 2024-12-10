@@ -32,6 +32,7 @@ return new class extends Migration
             $table->json('outline')->nullable();
             $table->text('cover_photo_path')->nullable();
             $table->boolean('is_parsed')->default(0);
+            $table->boolean('is_current')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

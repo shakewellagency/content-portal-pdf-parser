@@ -4,6 +4,7 @@ namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Jobs;
 
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\PageAssetDataIDAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\PDFPageParserAction;
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\SetVersionCurrentAction;
 use Shakewellagency\ContentPortalPdfParser\Features\RenditionPages\Actions\CreateRenditionPageAction;
 use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -109,9 +110,9 @@ class PDFPageParserJob implements ShouldQueue
         $this->rendition->save();
         $this->version->is_parsed = true;
         $this->version->save();
-        
-        Log::info("DONE Parsing Package: {$this->package->id}");
 
+        (new SetVersionCurrentAction)->execute($this->version, $this->rendition);
+        
         if ($this->localEnv) {
             unlink($this->parserFile);
         }
@@ -119,6 +120,7 @@ class PDFPageParserJob implements ShouldQueue
         LoggerInfo('Successfully parsed the PDF', [
             'package' => $this->package,
         ]);
+
         event(new ParsingFinishedEvent($this->package, $this->version));
     }
 
