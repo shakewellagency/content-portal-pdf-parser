@@ -87,7 +87,9 @@ class PDFPageParserJob implements ShouldQueue
 
         (new PageAssetDataIDAction)->execute($renditionPage);
 
-        if ($this->package->total_pages == $this->page) {
+        $totalParsedPage = $this->rendition->renditionPages->where('is_parsed', 1)->count();
+
+        if ($this->package->total_pages == $totalParsedPage) {
             $this->finisher();
         }
         
