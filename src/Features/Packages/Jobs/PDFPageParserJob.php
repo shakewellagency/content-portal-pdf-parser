@@ -17,6 +17,7 @@ use Shakewellagency\ContentPortalPdfParser\Events\ParsingFinishedEvent;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\FailedPackageAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInitializes\GetS3ParserFileTempAction;
 use Throwable;
+use Illuminate\Support\Facades\Cache;
 
 class PDFPageParserJob implements ShouldQueue
 {
@@ -33,6 +34,7 @@ class PDFPageParserJob implements ShouldQueue
     protected $version;
     protected $parserFile;
     protected $localEnv;
+    protected $cacheKey;
 
     /**
      * Create a new job instance.
@@ -41,7 +43,8 @@ class PDFPageParserJob implements ShouldQueue
         $page, 
         $totalPage, 
         $package,
-        $parserFile
+        $parserFile,
+        $cacheKey
     ){
         $this->package = $package;
         $this->page = $page;
@@ -49,6 +52,7 @@ class PDFPageParserJob implements ShouldQueue
         $this->rendition = $package->rendition;
         $this->version = $this->rendition->version;
         $this->parserFile = $parserFile;
+        $this->cacheKey = $cacheKey;
         $this->localEnv = config('shakewell-parser.env') == 'local';
     }
 
@@ -57,6 +61,11 @@ class PDFPageParserJob implements ShouldQueue
      */
     public function handle()
     {
+
+        if (Cache::get($this->cacheKey)) {
+            return;
+        }
+
         $renditionPage = $this->createRenditionPage();
         
         $parserFile = $this->localEnv ? $this->parserFile : (new GetS3ParserFileTempAction)->execute($this->package);
@@ -126,6 +135,8 @@ class PDFPageParserJob implements ShouldQueue
 
     public function failed(Throwable $exception)
     {
+        Cache::forever($this->cacheKey, true);
+
         (new FailedPackageAction)->execute(
             $this->package, 
             $this->version, 

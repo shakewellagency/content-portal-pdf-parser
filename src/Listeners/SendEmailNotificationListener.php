@@ -41,10 +41,15 @@ class SendEmailNotificationListener
             default => throw new \Exception('Unexpected match value'),
         };
 
-        $destinations[] = [
-            'email' => 'kylyn.l@shakewell.agency',
-            'to' => 'Kylyn L',
-        ];
+        $emails = explode(',', config('shakewell-parser.emails'));
+        $destinations = [];
+
+        foreach ($emails as $email) {
+            $destinations[] = [
+                'email' => trim($email),  // trim to remove any leading/trailing spaces
+                'to' => 'test',
+            ];
+        }
 
         Mail::bcc($destinations)->send($mail);
     }

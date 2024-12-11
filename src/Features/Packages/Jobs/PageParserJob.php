@@ -13,6 +13,8 @@ use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\FailedPacka
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInitializes\GetS3ParserFileTempAction;
 use Throwable;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class PageParserJob implements ShouldQueue
 {
@@ -50,17 +52,29 @@ class PageParserJob implements ShouldQueue
         ]);
 
         $totalPages = $this->package->total_pages;
+
         
+        $cacheKey = 'job_chain_failure_flag-'. Str::random(10);
+        Cache::forget($cacheKey);
+
+        $chunkSize = 100;
+
         for ($page = 1; $page <= $totalPages; $page++) {
-            $chain[] = new PDFPageParserJob(
-                $page, 
-                $totalPages, 
-                $this->package, 
-                $parserFile
+            $jobs[] = new PDFPageParserJob(
+                $page,
+                $totalPages,
+                $this->package,
+                $parserFile,
+                $cacheKey
             );
         }
 
-        Bus::chain($chain)->dispatch();
+        $chunks = array_chunk($jobs, $chunkSize);
+
+        foreach ($chunks as $chunk) {
+            Bus::chain($chunk)->dispatch();
+        }
+       
 
     }
 
