@@ -57,7 +57,7 @@ class PageParserJob implements ShouldQueue
         $cacheKey = 'job_chain_failure_flag-'. Str::random(10);
         Cache::forget($cacheKey);
 
-        $chunkSize = 300;
+        $chunkSize = 100;
 
         for ($page = 1; $page <= $totalPages; $page++) {
             $jobs[] = new PDFPageParserJob(

@@ -142,7 +142,11 @@ class PDFPageParserJob implements ShouldQueue
 
     public function failed(Throwable $exception)
     {
-        Cache::forever($this->cacheKey, true);
+        if (Cache::get($this->cacheKey)) {
+            return;
+        }
+
+        Cache::put($this->cacheKey, true, now()->addDay());
 
         (new FailedPackageAction)->execute(
             $this->package, 
