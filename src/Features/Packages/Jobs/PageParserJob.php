@@ -27,17 +27,15 @@ class PageParserJob implements ShouldQueue
     protected $package;
     protected $version;
     protected $rendition;
-    protected $parserFile;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($package, $version, $parserFile)
+    public function __construct($package, $version)
     {
         $package->refresh();
         $this->package = $package;
         $this->version = $version;
-        $this->parserFile = $parserFile;
     }
 
     /**
@@ -58,6 +56,8 @@ class PageParserJob implements ShouldQueue
         $cacheKey = 'job_chain_failure_flag-'. Str::random(10);
         Cache::forget($cacheKey);
 
+        $parserFile = (new GetS3ParserFileTempAction)->execute($this->package);
+
         $chunkSize = 100;
 
         for ($page = 1; $page <= $totalPages; $page++) {
@@ -65,7 +65,7 @@ class PageParserJob implements ShouldQueue
                 $page,
                 $totalPages,
                 $this->package,
-                $this->parserFile,
+                $parserFile,
                 $cacheKey
             );
         }
