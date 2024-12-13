@@ -66,6 +66,8 @@ class PDFPageParserJob implements ShouldQueue
             return;
         }
 
+        $isFileExist = file_exists($this->parserFile);
+        Log::info("isFileExist: {$isFileExist}");
         Log::info("parserfile: {$this->parserFile}");
         Log::info("parsing page: {$this->page}");
 
