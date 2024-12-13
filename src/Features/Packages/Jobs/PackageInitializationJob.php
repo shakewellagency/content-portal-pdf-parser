@@ -26,16 +26,14 @@ class PackageInitializationJob implements ShouldQueue
     public int $timeout = 7200;
     protected $package;
     protected $version;
-    protected $parserFile;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($package, $version, $parserFile)
+    public function __construct($package, $version)
     {
         $this->package = $package;
         $this->version = $version;
-        $this->parserFile = $parserFile;
     }
 
     /**
@@ -50,15 +48,19 @@ class PackageInitializationJob implements ShouldQueue
         $this->package->save();
        
         $this->package = (new GenerateHashAction)->execute($this->package);
-        $totalPages = (new PDFPageCounterAction)->execute($this->parserFile);
+        $parserFile = (new GetS3ParserFileTempAction)->execute($this->package);
+        $totalPages = (new PDFPageCounterAction)->execute($parserFile);
+
         $this->package->total_pages = $totalPages;
         $this->package->save();
 
         LoggerInfo('Successfully initialized the package', [
             'package' => $this->package,
             'version' => $this->version,
-            'parserFile' => $this->parserFile,
+            'parserFile' => $parserFile,
         ]);
+
+        unlink($parserFile);
     }
 
     public function failed(Throwable $exception)

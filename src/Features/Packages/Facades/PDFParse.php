@@ -20,10 +20,9 @@ class PDFParse
 
         event(new ParsingTriggerEvent($package, $version));
 
-        $parserFile = (new GetS3ParserFileTempAction)->execute($package);
         
         PackageInitializationJob::withChain([
-            new PageParserJob($package, $version, $parserFile),
-        ])->dispatch($package, $version, $parserFile);
+            new PageParserJob($package, $version),
+        ])->dispatch($package, $version);
     }
 }
