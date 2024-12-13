@@ -59,9 +59,10 @@ class PageParserJob implements ShouldQueue
 
         for ($startPage = 1; $startPage <= $totalPages; $startPage += $batchSize) {
             $endPage = min($startPage + $batchSize - 1, $totalPages); 
-            BatchParserJob::dispatch($this->package, $totalPages, [$startPage, $endPage], $cacheKey);
+            $jobs[] = new BatchParserJob($this->package, $totalPages, [$startPage, $endPage], $cacheKey);
         }
-
+        
+        Bus::chain($jobs)->dispatch();
     }
 
     private function createRendition()
