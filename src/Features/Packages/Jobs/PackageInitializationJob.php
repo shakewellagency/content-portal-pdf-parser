@@ -41,6 +41,10 @@ class PackageInitializationJob implements ShouldQueue
      */
     public function handle()
     {
+        //TODO: remove this
+        (new UnlinkTempFileAction)->execute();
+        //---- remove this
+
         event(new ParsingStartedEvent($this->package, $this->version));
         
         $packageStatusEnum = config('shakewell-parser.enums.package_status_enum');
@@ -50,17 +54,15 @@ class PackageInitializationJob implements ShouldQueue
         $this->package = (new GenerateHashAction)->execute($this->package);
         $parserFile = (new GetS3ParserFileTempAction)->execute($this->package);
         $totalPages = (new PDFPageCounterAction)->execute($parserFile);
-
         $this->package->total_pages = $totalPages;
         $this->package->save();
+
+        unlink($parserFile);
 
         LoggerInfo('Successfully initialized the package', [
             'package' => $this->package,
             'version' => $this->version,
-            'parserFile' => $parserFile,
         ]);
-
-        unlink($parserFile);
     }
 
     public function failed(Throwable $exception)
