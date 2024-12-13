@@ -105,7 +105,10 @@ class BatchParserJob implements ShouldQueue
         unlink($parserFile);
 
         Log::info("DONE Parsing Batch from: {$startPage} to: {$endPage}");
-        
+        LoggerInfo("DONE Parsing Batch from: {$startPage} to: {$endPage}", [
+            'package' => $this->package->toArray(),
+            'rendition' => $this->rendition,
+        ]);
     }
 
     private function createRenditionPage($page)
