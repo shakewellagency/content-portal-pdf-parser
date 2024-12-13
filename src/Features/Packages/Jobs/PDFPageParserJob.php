@@ -65,7 +65,7 @@ class PDFPageParserJob implements ShouldQueue
         if (Cache::get($this->cacheKey)) {
             return;
         }
-
+        
         $isFileExist = file_exists($this->parserFile);
         Log::info("isFileExist: {$isFileExist}");
         Log::info("parserfile: {$this->parserFile}");
@@ -73,9 +73,11 @@ class PDFPageParserJob implements ShouldQueue
 
         $renditionPage = $this->createRenditionPage();
         
+        $parserFile = $this->localEnv ? $this->parserFile : (new GetS3ParserFileTempAction)->execute($this->package);
+
         $renditionPage = (new PDFPageParserAction)->execute(
             $this->page,
-            $this->parserFile,
+            $parserFile,
             $renditionPage,
             $this->package,
         );
@@ -94,6 +96,10 @@ class PDFPageParserJob implements ShouldQueue
 
         if ($this->package->total_pages == $totalParsedPage) {
             $this->finisher();
+        }
+        
+        if (!$this->localEnv) {
+            unlink($parserFile);
         }
         
         Log::info("DONE Parsing page: {$this->page}");
@@ -123,6 +129,10 @@ class PDFPageParserJob implements ShouldQueue
 
         (new SetVersionCurrentAction)->execute($this->version, $this->rendition);
         
+        if ($this->localEnv) {
+            unlink($this->parserFile);
+        }
+
         LoggerInfo('Successfully parsed the PDF', [
             'package' => $this->package,
         ]);

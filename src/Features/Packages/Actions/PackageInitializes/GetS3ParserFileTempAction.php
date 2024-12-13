@@ -26,8 +26,6 @@ class GetS3ParserFileTempAction
 
         file_put_contents($parserFile, $fileContent);
         
-       
-
         return $parserFile;
     }
 }
