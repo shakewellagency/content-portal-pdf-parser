@@ -68,11 +68,9 @@ class PDFPageParserJob implements ShouldQueue
 
         $renditionPage = $this->createRenditionPage();
         
-        $parserFile = $this->localEnv ? $this->parserFile : (new GetS3ParserFileTempAction)->execute($this->package);
-
         $renditionPage = (new PDFPageParserAction)->execute(
             $this->page,
-            $parserFile,
+            $this->parserFile,
             $renditionPage,
             $this->package,
         );
@@ -93,10 +91,7 @@ class PDFPageParserJob implements ShouldQueue
             $this->finisher();
         }
         
-        if (!$this->localEnv) {
-            unlink($parserFile);
-        }
-        
+        Log::info("parserfile: {$this->parserFile}");
         Log::info("DONE Parsing page: {$this->page}");
     }
 
@@ -124,10 +119,6 @@ class PDFPageParserJob implements ShouldQueue
 
         (new SetVersionCurrentAction)->execute($this->version, $this->rendition);
         
-        if ($this->localEnv) {
-            unlink($this->parserFile);
-        }
-
         LoggerInfo('Successfully parsed the PDF', [
             'package' => $this->package,
         ]);

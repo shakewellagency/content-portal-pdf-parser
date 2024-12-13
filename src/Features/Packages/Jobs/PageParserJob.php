@@ -27,15 +27,17 @@ class PageParserJob implements ShouldQueue
     protected $package;
     protected $version;
     protected $rendition;
+    protected $parserFile;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($package, $version)
+    public function __construct($package, $version, $parserFile)
     {
         $package->refresh();
         $this->package = $package;
         $this->version = $version;
+        $this->parserFile = $parserFile;
     }
 
     /**
@@ -43,7 +45,6 @@ class PageParserJob implements ShouldQueue
      */
     public function handle()
     {
-        $parserFile = (new GetS3ParserFileTempAction)->execute($this->package);
         $this->rendition = $this->createRendition();
         
         LoggerInfo('Successfully created rendition', [
@@ -64,7 +65,7 @@ class PageParserJob implements ShouldQueue
                 $page,
                 $totalPages,
                 $this->package,
-                $parserFile,
+                $this->parserFile,
                 $cacheKey
             );
         }
@@ -74,8 +75,6 @@ class PageParserJob implements ShouldQueue
         foreach ($chunks as $chunk) {
             Bus::chain($chunk)->dispatch();
         }
-       
-
     }
 
     private function createRendition()
