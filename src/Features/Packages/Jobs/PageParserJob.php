@@ -43,7 +43,6 @@ class PageParserJob implements ShouldQueue
      */
     public function handle()
     {
-        $parserFile = (new GetS3ParserFileTempAction)->execute($this->package);
         $this->rendition = $this->createRendition();
         
         LoggerInfo('Successfully created rendition', [
@@ -52,29 +51,16 @@ class PageParserJob implements ShouldQueue
         ]);
 
         $totalPages = $this->package->total_pages;
-
         
         $cacheKey = 'job_chain_failure_flag-'. Str::random(10);
         Cache::forget($cacheKey);
 
-        $chunkSize = 100;
+        $batchSize = 1000; 
 
-        for ($page = 1; $page <= $totalPages; $page++) {
-            $jobs[] = new PDFPageParserJob(
-                $page,
-                $totalPages,
-                $this->package,
-                $parserFile,
-                $cacheKey
-            );
+        for ($startPage = 1; $startPage <= $totalPages; $startPage += $batchSize) {
+            $endPage = min($startPage + $batchSize - 1, $totalPages); 
+            BatchParserJob::dispatch($this->package, $totalPages, [$startPage, $endPage], $cacheKey);
         }
-
-        $chunks = array_chunk($jobs, $chunkSize);
-
-        foreach ($chunks as $chunk) {
-            Bus::chain($chunk)->dispatch();
-        }
-       
 
     }
 
