@@ -66,6 +66,9 @@ class PDFPageParserJob implements ShouldQueue
             return;
         }
 
+        Log::info("parserfile: {$this->parserFile}");
+        Log::info("parsing page: {$this->page}");
+
         $renditionPage = $this->createRenditionPage();
         
         $renditionPage = (new PDFPageParserAction)->execute(
@@ -91,7 +94,6 @@ class PDFPageParserJob implements ShouldQueue
             $this->finisher();
         }
         
-        Log::info("parserfile: {$this->parserFile}");
         Log::info("DONE Parsing page: {$this->page}");
     }
 
