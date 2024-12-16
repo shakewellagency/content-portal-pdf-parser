@@ -96,7 +96,7 @@ class BatchParserJob implements ShouldQueue
         }
 
 
-        $this->rendition->renditionPages->refresh();
+        $this->rendition->renditionPages()->refresh();
         $totalParsedPage = $this->rendition->renditionPages->where('is_parsed', 1)->count();
 
         if ($this->package->total_pages == $totalParsedPage) {
