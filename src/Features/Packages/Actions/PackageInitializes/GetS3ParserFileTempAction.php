@@ -25,7 +25,11 @@ class GetS3ParserFileTempAction
         rename($tempHtmlPath, $parserFile);
 
         file_put_contents($parserFile, $fileContent);
-        
+
+        if ($package->file_type === 'docs') {
+            return DocToPdfConverterHelper::convert($package, $fileContent, $currentTimestamp);
+        }
+
         return $parserFile;
     }
 }
