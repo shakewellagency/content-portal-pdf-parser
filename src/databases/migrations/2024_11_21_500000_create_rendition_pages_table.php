@@ -15,11 +15,11 @@ return new class extends Migration
     {
         Schema::create('rendition_pages', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('rendition_id'); 
+            $table->uuid('rendition_id');
             $table->foreign('rendition_id')
-                ->references('id')  
-                ->on('renditions') 
-                ->onDelete('cascade'); 
+                ->references('id')
+                ->on('renditions')
+                ->onDelete('cascade');
             $table->text('slug')->nullable();
             $table->integer('page_no')->nullable();
             $table->json('content')->nullable();

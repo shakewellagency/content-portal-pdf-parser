@@ -14,12 +14,12 @@ return new class extends Migration
     public function up()
     {
         Schema::create('versions', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('publication_id'); 
+            $table->uuid('id')->primary();
+            $table->uuid('publication_id');
             $table->foreign('publication_id')
-                ->references('id')  
-                ->on('publications') 
-                ->onDelete('cascade'); 
+                ->references('id')
+                ->on('publications')
+                ->onDelete('cascade');
             $table->text('title');
             $table->text('slug');
             $table->longText('description')->nullable();
@@ -35,11 +35,11 @@ return new class extends Migration
             $table->boolean('is_parsed')->default(0);
             $table->longtext('preview_token')->nullable();
             $table->longtext('approved_token')->nullable();
-            $table->unsignedBigInteger('approved_by')->nullable(); 
+            $table->uuid('approved_by')->nullable();
             $table->foreign('approved_by')
-                ->references('id')  
-                ->on('users') 
-                ->onDelete('set null'); 
+                ->references('id')
+                ->on('users')
+                ->onDelete('set null');
             $table->timestamps();
             $table->softDeletes();
         });

@@ -17,12 +17,12 @@ return new class extends Migration
     public function up()
     {
         Schema::create('rendition_assets', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('rendition_id'); 
+            $table->uuid('id')->primary();
+            $table->uuid('rendition_id');
             $table->foreign('rendition_id')
-                ->references('id')  
-                ->on('renditions') 
-                ->onDelete('cascade'); 
+                ->references('id')
+                ->on('renditions')
+                ->onDelete('cascade');
             $table->enum('type', [
                 RenditionAssetTypeEnum::Image->value,
                 RenditionAssetTypeEnum::Video->value,

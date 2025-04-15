@@ -15,19 +15,19 @@ return new class extends Migration
     public function up()
     {
         Schema::create('renditions', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('version_id')->nullable(); 
+            $table->uuid('id')->primary();
+            $table->uuid('version_id')->nullable();
             $table->foreign('version_id')
-                ->references('id')  
-                ->on('versions') 
-                ->onDelete('set null'); 
-            $table->unsignedBigInteger('package_id'); 
+                ->references('id')
+                ->on('versions')
+                ->onDelete('set null');
+            $table->uuid('package_id');
             $table->foreign('package_id')
-                ->references('id')  
-                ->on('packages') 
-                ->onDelete('cascade'); 
+                ->references('id')
+                ->on('packages')
+                ->onDelete('cascade');
             $table->enum('type', RenditionTypeEnum::values())
-                ->default(RenditionTypeEnum::PDF->value);    
+                ->default(RenditionTypeEnum::PDF->value);
             $table->longText('summary')->nullable();;
             $table->json('outline')->nullable();
             $table->text('cover_photo_path')->nullable();
