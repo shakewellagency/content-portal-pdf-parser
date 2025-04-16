@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('packages', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->uuid('id')->primary();
             $table->text('file_type')->nullable();
             $table->text('file_name')->nullable();
             $table->text('hash')->nullable();
@@ -28,11 +28,11 @@ return new class extends Migration
             $table->text('request_ip')->nullable();
             $table->text('parser_version')->nullable();
             $table->integer('total_pages')->nullable();
-            $table->unsignedBigInteger('initiated_by')->nullable(); 
+            $table->uuid('initiated_by')->nullable();
             $table->foreign('initiated_by')
-                ->references('id')  
-                ->on('users') 
-                ->onDelete('set null'); 
+                ->references('id')
+                ->on('users')
+                ->onDelete('set null');
             $table->timestamp('started_at')->nullable();
             $table->timestamp('finished_at')->nullable();
             $table->longtext('failed_exception')->nullable();

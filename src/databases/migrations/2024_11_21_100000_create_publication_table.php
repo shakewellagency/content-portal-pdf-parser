@@ -16,7 +16,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('publications', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->uuid('id')->primary();
             $table->string('publication_no')->nullable();
             $table->text('title');
             $table->text('slug');
