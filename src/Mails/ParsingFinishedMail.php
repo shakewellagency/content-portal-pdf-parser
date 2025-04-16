@@ -21,8 +21,8 @@ class ParsingFinishedMail extends Mailable
      */
     public function __construct(public $package, public $version)
     {
-        
-    }  
+
+    }
 
     /**
      * Get the message envelope.
@@ -40,7 +40,7 @@ class ParsingFinishedMail extends Mailable
     public function content(): Content
     {
         $publication = $this->version->publication;
-        
+
         $startedAt = Carbon::parse($this->package->started_at);
         $finishedAt = Carbon::parse($this->package->finished_at);
         $minutes = $startedAt->diffInMinutes($finishedAt);
@@ -48,13 +48,13 @@ class ParsingFinishedMail extends Mailable
         $previewLink = url("/publication/{$publication->id}/version/{$this->version->id}/preview/{$this->version->preview_token}");
         $approvedLink = url("/publication/{$publication->id}/version/{$this->version->id}/approved/{$this->version->approved_token}");
         $scheduleLink = url("/nova/resources/versions/{$this->version->id}/edit");
-        
+
         $markdown = 'mails.PDFParserMail.parsing-finished';
 
         LoggerInfo('Finished Mail has been sent', [
             'package' => $this->package->toArray(),
             'publicationNo' => $publication->publication_no,
-            'versionInfo' => json_decode($this->version->version_meta),
+            'versionInfo' => $this->version->version_meta,
             'startedDate' => $this->package->started_at,
             'finishedDate' => $this->package->finished_at,
             'processTime' => round($minutes, 2),
@@ -67,7 +67,7 @@ class ParsingFinishedMail extends Mailable
             markdown: $markdown,
             with: [
                 'publicationNo' => $publication->publication_no,
-                'versionInfo' => json_decode($this->version->version_meta),
+                'versionInfo' => $this->version->version_meta,
                 'startedDate' => $this->package->started_at,
                 'finishedDate' => $this->package->finished_at,
                 'processTime' => round($minutes, 2),

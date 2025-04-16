@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('rendition_pages', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->uuid('id')->primary();
             $table->uuid('rendition_id');
             $table->foreign('rendition_id')
                 ->references('id')

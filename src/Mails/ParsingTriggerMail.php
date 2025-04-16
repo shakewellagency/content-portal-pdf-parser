@@ -23,8 +23,8 @@ class ParsingTriggerMail extends Mailable
 
     public function __construct(public $package, public $version)
     {
-        
-    }   
+
+    }
 
     /**
      * Get the message envelope.
@@ -46,7 +46,7 @@ class ParsingTriggerMail extends Mailable
         LoggerInfo('Trigger Mail has been sent', [
             'triggerDate' => Carbon::now()->timezone(config('shakewell-parser.timezone')),
             'publicationNo' => $this->version->publication->publication_no,
-            'versionInfo' => json_decode($this->version->version_meta),
+            'versionInfo' => $this->version->version_meta,
         ]);
 
         return new Content(
@@ -54,7 +54,7 @@ class ParsingTriggerMail extends Mailable
             with: [
                 'triggerDate' => Carbon::now()->timezone(config('shakewell-parser.timezone')),
                 'publicationNo' => $this->version->publication->publication_no,
-                'versionInfo' => json_decode($this->version->version_meta),
+                'versionInfo' => $this->version->version_meta,
             ]
         );
     }
