@@ -21,8 +21,8 @@ class ParsingStartedMail extends Mailable
      */
     public function __construct(public $package, public $version)
     {
-        
-    }   
+
+    }
 
     /**
      * Get the message envelope.
@@ -44,7 +44,7 @@ class ParsingStartedMail extends Mailable
         LoggerInfo('Started Mail has been sent', [
             'package' => $this->package->toArray(),
             'publicationNo' => $this->version->publication->publication_no,
-            'versionInfo' => json_decode($this->version->version_meta),
+            'versionInfo' => $this->version->version_meta,
             'startedDate' => $this->package->started_at,
         ]);
 
@@ -52,7 +52,7 @@ class ParsingStartedMail extends Mailable
             markdown: $markdown,
             with: [
                 'publicationNo' => $this->version->publication->publication_no,
-                'versionInfo' => json_decode($this->version->version_meta),
+                'versionInfo' => $this->version->version_meta,
                 'startedDate' => $this->package->started_at,
             ]
         );

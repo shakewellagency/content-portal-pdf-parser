@@ -19,12 +19,12 @@ class ParsingFailedMail extends Mailable
      * Create a new message instance.
      */
     public function __construct(
-        public $package, 
+        public $package,
         public $version,
         public $errorMessage
     ) {
-        
-    }  
+
+    }
 
     /**
      * Get the message envelope.
@@ -46,7 +46,7 @@ class ParsingFailedMail extends Mailable
         LoggerInfo('Failed Mail has been sent', [
             'package' => $this->package->toArray(),
             'publicationNo' => $this->version->publication->publication_no,
-            'versionInfo' => json_decode($this->version->version_meta),
+            'versionInfo' => $this->version->version_meta,
             'startedDate' => $this->package->started_at,
             'failedException' => $this->package->failed_exception,
             'errorMessage' => $this->errorMessage,
@@ -55,7 +55,7 @@ class ParsingFailedMail extends Mailable
             markdown: $markdown,
             with: [
                 'publicationNo' => $this->version->publication->publication_no,
-                'versionInfo' => json_decode($this->version->version_meta),
+                'versionInfo' => $this->version->version_meta,
                 'startedDate' => $this->package->started_at,
                 'failedException' => $this->package->failed_exception,
                 'errorMessage' => $this->errorMessage,
