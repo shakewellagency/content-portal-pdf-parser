@@ -16,7 +16,7 @@ class PageDeepLinkAction
     
             if (preg_match('/parser_[^"]+\.html#(\d+)/', $href, $matches)) {
                 $idNumber = $matches[1];
-                $anchor->setAttribute('href', 'page' . $idNumber . '-div');
+                $anchor->setAttribute('href', '#page' . $idNumber . '-div');
             }
         }
     
