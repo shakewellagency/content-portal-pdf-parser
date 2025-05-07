@@ -5,6 +5,10 @@ namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPa
 
 class PageDeepLinkAction
 {
+    /**
+     * This Action will change all a tag href from parser_{hash}#{id}
+     * to #page{id}-div
+     */
     public function execute($renditionPage) 
     {
         $htmlString = json_decode($renditionPage->content);

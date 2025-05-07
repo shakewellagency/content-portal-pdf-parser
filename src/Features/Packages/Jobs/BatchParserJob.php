@@ -19,6 +19,7 @@ use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInit
 use Throwable;
 use Illuminate\Support\Facades\Cache;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\PageDeepLinkAction;
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\PageFontColorATagAction;
 
 class BatchParserJob implements ShouldQueue
 {
@@ -93,6 +94,7 @@ class BatchParserJob implements ShouldQueue
 
             (new PageAssetDataIDAction)->execute($renditionPage);
             (new PageDeepLinkAction)->execute($renditionPage);
+            (new PageFontColorATagAction)->execute($renditionPage);
 
             Log::info("DONE Parsing Page {$page}");
         }

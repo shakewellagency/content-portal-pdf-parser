@@ -5,6 +5,9 @@ namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPa
 
 class PageAssetDataIDAction
 {
+    /**
+     * This Action will append asset-path to the img tag
+     */
     public function execute($renditionPage) 
     {
         $htmlString = json_decode($renditionPage->content);
