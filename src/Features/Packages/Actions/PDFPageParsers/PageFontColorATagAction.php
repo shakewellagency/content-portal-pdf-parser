@@ -2,6 +2,7 @@
 
 namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers;
 
+use Illuminate\Support\Str;
 
 class PageFontColorATagAction
 {
