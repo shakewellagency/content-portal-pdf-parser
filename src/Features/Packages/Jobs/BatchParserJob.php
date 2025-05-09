@@ -18,6 +18,7 @@ use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\FailedPacka
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PackageInitializes\GetS3ParserFileTempAction;
 use Throwable;
 use Illuminate\Support\Facades\Cache;
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\ExtractHeightWidthAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\PageDeepLinkAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\PageFontColorATagAction;
 
@@ -95,6 +96,7 @@ class BatchParserJob implements ShouldQueue
             (new PageAssetDataIDAction)->execute($renditionPage);
             (new PageDeepLinkAction)->execute($renditionPage);
             (new PageFontColorATagAction)->execute($renditionPage);
+            (new ExtractHeightWidthAction)->execute($renditionPage);
 
             Log::info("DONE Parsing Page {$page}");
         }
