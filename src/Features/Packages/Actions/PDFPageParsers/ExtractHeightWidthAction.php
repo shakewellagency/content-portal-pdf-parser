@@ -18,6 +18,10 @@ class ExtractHeightWidthAction
     
         $div = $dom->getElementById("page{$renditionPage->page_no}-div");
         
+        if (!$div) {
+            $div = $dom->getElementById("page{$renditionPage->page_no}");
+        }
+        
         if ($div) {
             $style = $div->getAttribute('style');
     
