@@ -18,11 +18,15 @@ class Watermark
         $watermarkContainer = $dom->createElement('div');
         $watermarkContainer->setAttribute('class', 'watermark-container');
         $watermarkContainer->setAttribute('style', '
-            position: absolute; 
+            position: absolute;
+            top: 1%; 
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
             width: 58rem; 
             height: 74rem; 
-            top: 1%; 
-            z-index: 9999; 
             text-align: center; 
             display: flex; 
             justify-content: center; 
