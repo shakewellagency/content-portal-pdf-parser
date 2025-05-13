@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Cache;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\ExtractHeightWidthAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\PageDeepLinkAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\PageFontColorATagAction;
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\ParseContentValueAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\RemoveLastHRTagAction;
 
 class BatchParserJob implements ShouldQueue
@@ -99,6 +100,7 @@ class BatchParserJob implements ShouldQueue
             (new PageFontColorATagAction)->execute($renditionPage);
             (new ExtractHeightWidthAction)->execute($renditionPage);
             (new RemoveLastHRTagAction)->execute($renditionPage);
+            (new ParseContentValueAction)->execute($renditionPage);
 
             Log::info("DONE Parsing Page {$page}");
         }
