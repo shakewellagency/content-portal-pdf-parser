@@ -100,8 +100,8 @@ class BatchParserJob implements ShouldQueue
             (new PageDeepLinkAction)->execute($renditionPage);
             (new PageFontColorATagAction)->execute($renditionPage);
             (new ExtractHeightWidthAction)->execute($renditionPage);
-            (new HTMLCleanUps)->execute($renditionPage);
-            // (new ParseContentValueAction)->execute($renditionPage);
+            // (new HTMLCleanUps)->execute($renditionPage);
+            (new ParseContentValueAction)->execute($renditionPage);
 
             Log::info("DONE Parsing Page {$page}");
         }
