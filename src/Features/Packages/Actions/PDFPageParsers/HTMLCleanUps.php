@@ -2,6 +2,7 @@
 
 namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers;
 
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\CleanUps\AddUnderlineBoxAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\CleanUps\AdjustPaddingTopAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\CleanUps\RemoveHRAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\CleanUps\TOCDotAlignAction;
@@ -22,9 +23,10 @@ class HTMLCleanUps
         @$dom->loadHTML($htmlString);
 
         
-        $dom = (new TOCDotAlignAction)->execute($dom);
+        // $dom = (new TOCDotAlignAction)->execute($dom);
         $dom = (new RemoveHRAction)->execute($dom);
         $dom = (new AdjustPaddingTopAction)->execute($dom);
+        $dom = (new AddUnderlineBoxAction)->execute($dom);
 
         $modified = $dom->saveHTML();
 
