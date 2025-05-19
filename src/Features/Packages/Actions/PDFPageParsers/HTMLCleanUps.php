@@ -31,7 +31,6 @@ class HTMLCleanUps
         $modified = $dom->saveHTML();
 
         $renditionPage->content = json_encode($modified);
-        $renditionPage->has_html_cleaned = true;
         $renditionPage->save();
         $renditionPage->refresh();
 
