@@ -97,11 +97,29 @@ class BatchParserJob implements ShouldQueue
             }
 
             (new PageAssetDataIDAction)->execute($renditionPage);
+            LoggerInfo("Done PageAssetDataIDAction page:{$renditionPage->id}", [
+                'renditionPage' => $renditionPage,
+            ]);
             (new PageDeepLinkAction)->execute($renditionPage);
+            LoggerInfo("Done PageDeepLinkAction page:{$renditionPage->id}", [
+                'renditionPage' => $renditionPage,
+            ]);
             (new PageFontColorATagAction)->execute($renditionPage);
+            LoggerInfo("Done PageFontColorATagAction page:{$renditionPage->id}", [
+                'renditionPage' => $renditionPage,
+            ]);
             (new ExtractHeightWidthAction)->execute($renditionPage);
+            LoggerInfo("Done ExtractHeightWidthAction page:{$renditionPage->id}", [
+                'renditionPage' => $renditionPage,
+            ]);
             (new HTMLCleanUps)->execute($renditionPage);
+            LoggerInfo("Done HTMLCleanUps page:{$renditionPage->id}", [
+                'renditionPage' => $renditionPage,
+            ]);
             (new ParseContentValueAction)->execute($renditionPage);
+            LoggerInfo("Done ParseContentValueAction page:{$renditionPage->id}", [
+                'renditionPage' => $renditionPage,
+            ]);
             $renditionPage->refresh();
 
             Log::info("DONE Parsing Page {$page}");
