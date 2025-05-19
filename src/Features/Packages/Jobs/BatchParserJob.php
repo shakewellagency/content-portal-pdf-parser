@@ -95,6 +95,10 @@ class BatchParserJob implements ShouldQueue
                 );
             }
 
+            $renditionPage->original_content = $renditionPage->content;
+            $renditionPage->save();
+            $renditionPage->refresh();
+
             (new PageAssetDataIDAction)->execute($renditionPage);
             (new PageDeepLinkAction)->execute($renditionPage);
             (new PageFontColorATagAction)->execute($renditionPage);
