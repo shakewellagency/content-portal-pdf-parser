@@ -173,5 +173,6 @@ class BatchParserJob implements ShouldQueue
         );
 
         $this->rendition->delete();
+        $this->rendition->renditionPages()->delete();
     }
 }
