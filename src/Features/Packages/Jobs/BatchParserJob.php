@@ -33,7 +33,7 @@ class BatchParserJob implements ShouldQueue
     use SerializesModels;
 
     public int $timeout = 7200;
-
+    public $tries = 1;
     protected $totalPage;
     protected $package;
     protected $pageRange;
