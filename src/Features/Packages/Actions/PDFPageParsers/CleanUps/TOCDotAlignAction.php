@@ -7,66 +7,95 @@ use Illuminate\Support\Str;
 class TOCDotAlignAction
 {
 
-    public function execute($dom) 
+    public function execute($dom)
     {
-       $xpath = new \DOMXPath($dom);
-
-        // Query all <p> tags
+        $xpath = new \DOMXPath($dom);
         $pTags = $xpath->query('//p');
 
         foreach ($pTags as $pTag) {
             $textContent = $pTag->textContent;
 
             if (preg_match('/\.{5,}/', $textContent)) {
+                $aTags = $pTag->getElementsByTagName('a');
 
-                $style = $pTag->getAttribute('style');
+                if ($aTags->length > 0) {
+                    $style = $pTag->getAttribute('style');
+                    preg_match('/top:\s*([\d\.]+)px/', $style, $topMatch);
+                    preg_match('/left:\s*([\d\.]+)px/', $style, $leftMatch);
 
-                preg_match('/left:(\d+)px/', $style, $matches);
-                $left = isset($matches[1]) ? $matches[1] : 0;
+                    $topValue = isset($topMatch[1]) ? (float) $topMatch[1] : 0;
+                    $leftValue = isset($leftMatch[1]) ? (float) $leftMatch[1] : 0;
+                    $currentTop = $topValue;
 
-                $top = $this->extractTop($style);
+                    $fragment = $dom->createDocumentFragment();
 
-                preg_match('/^(.*?)\s*\.*\s*(\d+)$/', $textContent, $textMatches);
-                $label = isset($textMatches[1]) ? trim($textMatches[1]) : '';
-                $pageNumber = isset($textMatches[2]) ? $textMatches[2] : '';
+                    foreach ($aTags as $aTag) {
+                        $linkText = $aTag->textContent;
+                        $href = $aTag->getAttribute('href');
+                        $linkText = str_replace("\u{A0}", ' ', $linkText);
+                        $items = $this->getLabelAndPageNumber($linkText, $href);
 
-                $div = $dom->createElement('div');
-                $divStyle = "position:absolute;top:{$top}px;left:{$left}px;display:flex;justify-content:space-between;width:calc((100% - {$left}px) * 0.931);";
-                $div->setAttribute('style', $divStyle);
+                        foreach ($items as $item) {
+                            $div = $this->createDivBlock($dom, $item, $leftValue, $currentTop);
+                            $fragment->appendChild($div);
+                            $currentTop += 18;
+                        }
+                    }
 
-                if ($pTag->hasAttribute('class')) {
-                    $div->setAttribute('class', $pTag->getAttribute('class'));
+                    $pTag->parentNode->replaceChild($fragment, $pTag);
                 }
-
-                $aHref = '#';
-                if ($pTag->getElementsByTagName('a')->length > 0) {
-                    $aHref = $pTag->getElementsByTagName('a')->item(0)->getAttribute('href');
-                }
-
-                $aTag = $dom->createElement('a');
-                $aTag->setAttribute('href', $aHref);
-                $labelP = $dom->createElement('p', htmlspecialchars($label));
-                $aTag->appendChild($labelP);
-                $div->appendChild($aTag);
-
-                $separatorP = $dom->createElement('p');
-                $separatorP->setAttribute('style', 'flex:1; border-bottom:2px dotted #000; margin:0 2px;');
-                $div->appendChild($separatorP);
-
-                $pageP = $dom->createElement('p', htmlspecialchars($pageNumber));
-                $div->appendChild($pageP);
-
-                $pTag->parentNode->replaceChild($div, $pTag);
             }
         }
 
         return $dom;
     }
 
-    // Helper method to extract top value from style
-    private function extractTop($style)
+    private function getLabelAndPageNumber($textContent, $href)
     {
-        preg_match('/top:(\d+)px/', $style, $matches);
-        return isset($matches[1]) ? $matches[1] : 0;
+        $results = [];
+
+        // Match: label text, followed by dots, then page number
+        preg_match_all('/(.*?)\.{5,}\s*(\d+)/', $textContent, $matches, PREG_SET_ORDER);
+
+        foreach ($matches as $match) {
+            $label = trim($match[1]);
+            $page = (int) $match[2];
+
+            $results[] = [
+                'label' => $label,
+                'page'  => $page,
+                'href'  => $href,
+            ];
+        }
+
+        return $results;
+    }
+
+    private function createDivBlock($dom, $item, $leftValue, $topValue)
+    {
+        $label = htmlspecialchars($item['label']);
+        $page = $item['page'];
+        $href = htmlspecialchars($item['href']);
+
+        $div = $dom->createElement('div');
+        $div->setAttribute('style', "position:absolute; top:{$topValue}px; left:{$leftValue}px; display:flex; justify-content:space-between; width: calc((100% - {$leftValue}px) * 0.931);");
+        $div->setAttribute('class', 'ft01');
+
+        $a = $dom->createElement('a');
+        $a->setAttribute('href', $href);
+
+        $pLabel = $dom->createElement('p', $label);
+        $a->appendChild($pLabel);
+
+        $pDotted = $dom->createElement('p');
+        $pDotted->setAttribute('style', 'flex:1; border-bottom:2px dotted #000; margin:4px 2px;');
+
+        $pPage = $dom->createElement('p', $page);
+
+        $div->appendChild($a);
+        $div->appendChild($pDotted);
+        $div->appendChild($pPage);
+
+        return $div;
     }
 }
