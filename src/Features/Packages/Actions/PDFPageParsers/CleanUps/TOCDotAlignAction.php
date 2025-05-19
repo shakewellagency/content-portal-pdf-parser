@@ -7,8 +7,9 @@ use Illuminate\Support\Str;
 class TOCDotAlignAction
 {
 
-    public function execute($dom)
+    public function execute($dom, $renditionPage)
     {
+        $hasTOC = false;
         $xpath = new \DOMXPath($dom);
         $pTags = $xpath->query('//p');
 
@@ -16,6 +17,7 @@ class TOCDotAlignAction
             $textContent = $pTag->textContent;
 
             if (preg_match('/\.{5,}/', $textContent)) {
+                $hasTOC = true;
                 $aTags = $pTag->getElementsByTagName('a');
 
                 if ($aTags->length > 0) {
@@ -46,6 +48,10 @@ class TOCDotAlignAction
                 }
             }
         }
+
+        $renditionPage->has_toc = $hasTOC;
+        $renditionPage->save();
+        $renditionPage->refresh();
 
         return $dom;
     }

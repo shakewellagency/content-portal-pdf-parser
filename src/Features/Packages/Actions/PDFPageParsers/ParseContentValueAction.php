@@ -12,7 +12,8 @@ class ParseContentValueAction
      */
     public function execute($renditionPage) 
     {
-       $content = json_decode($renditionPage->content);
+        $renditionPage->refresh();
+        $content = json_decode($renditionPage->content);
         $cleanText = strip_tags($content); // Remove HTML tags
         $cleanText = str_replace("\n", ' ', $cleanText); 
         $cleanText = str_replace("\u{A0}", ' ', $cleanText); 
