@@ -6,26 +6,49 @@ use DOMDocument;
 
 class Watermark
 {
-    public static function add($htmlString, $watermarkModel)
+    /**
+     * Insert the watermark on the page content
+     *
+     * @param string $htmlString
+     * @param string | App\Features\Watermarks\Models\Watermark $watermark
+     * @return string
+     */
+    public static function add($htmlString, $watermark)
     {
-        // Handle string watermark for backward compatibility
-        if (is_string($watermarkModel)) {
-            // Create a simple object with text type properties
-            $textWatermark = new \stdClass();
-            $textWatermark->type = 'text';
-            $textWatermark->value = $watermarkModel;
-            $watermarkModel = $textWatermark;
-        }
+        $watermark = self::handleStringWatermarks($watermark);
 
         $dom = new \DOMDocument();
         libxml_use_internal_errors(true);
         $dom->loadHTML($htmlString);
         libxml_clear_errors();
 
-        // Create watermark container
-        $watermarkContainer = $dom->createElement('div');
-        $watermarkContainer->setAttribute('class', 'watermark-container');
-        $watermarkContainer->setAttribute('style', '
+        $watermarkContainer = self::createWatermarkContainer($dom);
+        $watermarkContent = self::createWatermarkContent($dom, $watermark);
+
+        $watermarkContainer->appendChild($watermarkContent);
+        $dom->getElementsByTagName('body')->item(0)->appendChild($watermarkContainer);
+
+        return $dom->saveHTML();
+    }
+
+    protected static function handleStringWatermarks($model)
+    {
+        if (is_string($model)) {
+            $textWatermark = new \stdClass();
+            $textWatermark->type = 'text';
+            $textWatermark->value = $model;
+
+            return $textWatermark;
+        }
+
+        return $model;
+    }
+
+    protected static function createWatermarkContainer($dom)
+    {
+        $container = $dom->createElement('div');
+        $container->setAttribute('class', 'watermark-container');
+        $container->setAttribute('style', '
             position: absolute;
             top: 1%;
             left: 0;
@@ -41,62 +64,67 @@ class Watermark
             align-items: center;'
         );
 
-        // Create watermark content
-        $watermarkContent = $dom->createElement('div');
-        $watermarkContent->setAttribute('class', 'watermark-content');
+        return $container;
+    }
 
-        // Get rotation value from model or default to -45deg
-        $rotation = $watermarkModel->rotate ?? -45;
-        // Get opacity value from model or default to 0.3
-        $opacity = $watermarkModel->opacity ?? 0.3;
+    protected static function createWatermarkContent($dom, $model)
+    {
+        $content = $dom->createElement('div');
+        $content->setAttribute('class', 'watermark-content');
 
-        // Handle different watermark types
-        if ($watermarkModel->type === 'text') {
-            // For text watermarks
-            $watermarkText = strtoupper($watermarkModel->value);
-            $fontSize = $watermarkModel->font_size ?? 72;
-            $color = $watermarkModel->color ?? 'rgba(255, 0, 0, ' . $opacity . ')';
-
-            $watermarkContent->setAttribute('style', '
-                transform: rotate(' . $rotation . 'deg);
-                font-size: ' . $fontSize . 'px;
-                color: ' . $color . ';'
-            );
-
-            // Add dynamic text to watermark content
-            $watermarkContentText = $dom->createTextNode($watermarkText);
-            $watermarkContent->appendChild($watermarkContentText);
-        } else if ($watermarkModel->type === 'image') {
-            // For image watermarks
-
-            $watermarkContent->setAttribute('style', '
-                transform: rotate(' . $rotation . 'deg);'
-            );
-
-            // Create image element
-            $imageElement = $dom->createElement('img');
-            $imageElement->setAttribute('src', $watermarkModel->image_url);
-            $imageElement->setAttribute('style', '
-                opacity: ' . $opacity . ';
-                max-width: 29rem; /* 50% of container width */
-                max-height: 37rem; /* 50% of container height */
-                width: auto;
-                height: auto;'
-            );
-
-            // Add image to watermark content
-            $watermarkContent->appendChild($imageElement);
+        if ($model->type === 'text') {
+            return self::processTextWatermark($dom, $content, $model);
         }
 
-        // Append watermark content to watermark container
-        $watermarkContainer->appendChild($watermarkContent);
+        if ($model->type === 'image') {
+            return self::processImageWatermark($dom, $content, $model);
+        }
 
-        // Find the body element and append the watermark container
-        $body = $dom->getElementsByTagName('body')->item(0);
-        $body->appendChild($watermarkContainer);
+        return $content;
+    }
 
-        // Save the modified HTML
-        return $dom->saveHTML();
+    protected static function processTextWatermark($dom, $content, $model)
+    {
+        $rotation = $model->rotate ?? -45;
+        $opacity = $model->opacity ?? 0.3;
+        $fontSize = $model->font_size ?? 72;
+        $color = $model->color ?? 'rgba(255, 0, 0, ' . $opacity . ')';
+        $text = strtoupper($model->value);
+
+        $content->setAttribute('style', '
+            transform: rotate(' . $rotation . 'deg);
+            font-size: ' . $fontSize . 'px;
+            color: ' . $color . ';'
+        );
+
+        $textNode = $dom->createTextNode($text);
+        $content->appendChild($textNode);
+
+        return $content;
+    }
+
+    protected static function processImageWatermark($dom, $content, $model)
+    {
+        $rotation = $model->rotate ?? -45;
+        $opacity = $model->opacity ?? 0.3;
+
+        $content->setAttribute('style', '
+            transform: rotate(' . $rotation . 'deg);'
+        );
+
+        $image = $dom->createElement('img');
+        $image->setAttribute('src', $model->image_url);
+        $image->setAttribute('style', '
+            opacity: ' . $opacity . ';
+            max-width: 29rem;
+            max-height: 37rem;
+            width: auto;
+            height: auto;'
+        );
+
+        $content->appendChild($image);
+
+        return $content;
     }
 
     public static function remove($htmlString)
