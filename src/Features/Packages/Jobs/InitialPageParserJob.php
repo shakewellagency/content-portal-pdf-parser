@@ -9,6 +9,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\CoverPhotoAction;
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\ParseTOCAction;
 
 class InitialPageParserJob implements ShouldQueue
 {
@@ -39,6 +40,9 @@ class InitialPageParserJob implements ShouldQueue
     public function handle()
     {
        $rendition = (new OutlineParseAction)->execute($this->renditionPage, $this->rendition);
+       $rendition->refresh();
+       (new ParseTOCAction)->execute($rendition);
+
        (new CoverPhotoAction)->execute(
             $this->renditionPage, 
             $rendition,

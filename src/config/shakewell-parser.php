@@ -12,6 +12,7 @@ return [
         'rendition_model' => '', //App\Features\Renditions\Models\Rendition::class,
         'rendition_asset_model' => '', //App\Features\Renditions\Models\RenditionAsset::class,
         'rendition_page_model' => '', //App\Features\Renditions\Models\RenditionPage::class,
+        'toc_model' => '', //App\Features\Renditions\Models\RenditionPage::class,
     ],
     'enums' => [
         'package_status_enum' => '', //App\Features\Packages\Enums\PackageStatusEnum::class,
