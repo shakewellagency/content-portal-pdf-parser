@@ -10,6 +10,13 @@ class ParseTOCAction
 {
     public function execute($rendition)
     {
+
+        if ($rendition->tocs->isNotEmpty()) {
+            $rendition->tocs()->forceDelete();
+            $rendition->refresh();
+        }
+
+        
         $renditionId = $rendition->id;
         $outline = json_decode($rendition->outline);
 
