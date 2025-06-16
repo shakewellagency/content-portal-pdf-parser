@@ -23,6 +23,7 @@ use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPagePars
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\PageDeepLinkAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\PageFontColorATagAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\ParseContentValueAction;
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\ParseTOCAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\RemoveLastHRTagAction;
 
 class BatchParserJob implements ShouldQueue
@@ -106,7 +107,7 @@ class BatchParserJob implements ShouldQueue
             Log::info("DONE Parsing Page {$page}");
         }
 
-
+        (new ParseTOCAction)->execute($this->rendition);
         $totalParsedPage = $this->rendition->renditionPages->where('is_parsed', 1)->count();
 
         if ($this->package->total_pages == $totalParsedPage) {

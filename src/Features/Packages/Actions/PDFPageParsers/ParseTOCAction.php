@@ -11,6 +11,8 @@ class ParseTOCAction
     public function execute($rendition)
     {
 
+        $rendition->refresh();
+        
         if (!$rendition->outline) {
             LoggerInfo('No Outline to Parse.', [
                 'rendition' => $rendition->toArray(),

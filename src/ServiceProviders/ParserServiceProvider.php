@@ -9,7 +9,6 @@ use Shakewellagency\ContentPortalPdfParser\Events\ParsingFinishedEvent;
 use Shakewellagency\ContentPortalPdfParser\Events\ParsingStartedEvent;
 use Shakewellagency\ContentPortalPdfParser\Events\ParsingTriggerEvent;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Helpers\ModifyPublishedNamespaceHelper;
-use Shakewellagency\ContentPortalPdfParser\Features\Renditions\Observers\RenditionObserver;
 use Shakewellagency\ContentPortalPdfParser\Listeners\SendEmailNotificationListener;
 
 class ParserServiceProvider extends ServiceProvider
