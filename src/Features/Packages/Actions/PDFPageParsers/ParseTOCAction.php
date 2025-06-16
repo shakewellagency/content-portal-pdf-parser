@@ -89,7 +89,11 @@ class ParseTOCAction
             Log::warning("payload: $a");
 
             $toc = (new CreateTocAction)->execute($payload);
-            $toc->refresh();
+
+            if (!$toc->id) {
+                usleep(50000);
+                $toc->refresh();
+            }
 
             $b = json_encode($toc);
             Log::warning("toc created, toc: $b");
