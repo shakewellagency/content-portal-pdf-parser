@@ -32,7 +32,6 @@ class BatchParserJob implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public $tries = 1;
     public int $timeout = 7200;
     protected $totalPage;
     protected $package;
@@ -102,10 +101,6 @@ class BatchParserJob implements ShouldQueue
                 (new PageDeepLinkAction)->execute($renditionPage);
                 (new PageFontColorATagAction)->execute($renditionPage);
                 (new ExtractHeightWidthAction)->execute($renditionPage);
-
-                $renditionPage->original_content = $renditionPage->content;
-                $renditionPage->save();
-                $renditionPage->refresh();
 
                 (new HTMLCleanUps)->execute($renditionPage);
                 (new ParseContentValueAction)->execute($renditionPage);
