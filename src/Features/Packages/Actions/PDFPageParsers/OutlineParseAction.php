@@ -21,7 +21,7 @@ class OutlineParseAction
         } else {
             $ulContent = null; 
         }
-
+        
         $rendition->outline = $this->linkOutlineParser($ulContent, $rendition);
         $rendition->save();
         $rendition->refresh();

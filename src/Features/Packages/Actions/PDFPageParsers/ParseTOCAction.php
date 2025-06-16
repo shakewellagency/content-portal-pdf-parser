@@ -37,7 +37,6 @@ class ParseTOCAction
         $uls = $body->getElementsByTagName('ul');
 
         if ($uls->length > 0) {
-            // Wrap the entire recursive insert in a transaction
             DB::transaction(function () use ($uls, $renditionId) {
                 $orderCounters = [];
                 $this->processList($uls->item(0), null, $renditionId, $orderCounters);
