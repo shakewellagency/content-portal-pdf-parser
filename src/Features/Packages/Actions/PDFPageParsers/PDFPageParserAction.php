@@ -61,9 +61,8 @@ class PDFPageParserAction
             unlink($file);
         }
 
-        $renditionPage->original_content = $renditionPage->content;
-        $renditionPage->save();
-
+        // $renditionPage->original_content = $renditionPage->content;
+        // $renditionPage->save();
         
         return $renditionPage;
     }
