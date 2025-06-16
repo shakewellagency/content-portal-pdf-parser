@@ -37,7 +37,7 @@ class ParseTOCAction
 
         $uls = $body->getElementsByTagName('ul');
         if ($uls->length > 0) {
-            $this->processList($uls->item(0),null, $renditionId, package:$package);
+            $this->processList($uls->item(0),null, $renditionId);
         }
 
         libxml_clear_errors();
@@ -45,7 +45,7 @@ class ParseTOCAction
         
     }
 
-    public function processList($ul, $parentId = null, $renditionId, &$orderCounters = [], $package)
+    public function processList($ul, $parentId = null, $renditionId, &$orderCounters = [])
     {
         if (!isset($orderCounters[$parentId])) {
             $orderCounters[$parentId] = 1;
@@ -81,10 +81,6 @@ class ParseTOCAction
                 'order' => $orderCounters[$parentId],
             ];
 
-            LoggerInfo("package:$package->id - saving toc.", [
-                'toc' => $payload,
-            ]);
-
             $toc = (new CreateTocAction)->execute($payload);
 
             $orderCounters[$parentId]++;
@@ -92,7 +88,7 @@ class ParseTOCAction
             // Now look for immediate child <ul> elements under this <li>
             foreach ($li->childNodes as $child) {
                 if ($child->nodeName === 'ul') {
-                    $this->processList($child, $toc->id, $renditionId, $orderCounters, package:$package);
+                    $this->processList($child, $toc->id, $renditionId, $orderCounters);
                 }
             }
         }
