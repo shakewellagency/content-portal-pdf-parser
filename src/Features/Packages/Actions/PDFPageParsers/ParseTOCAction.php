@@ -4,6 +4,7 @@ namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPa
 
 use DOMDocument;
 use GuzzleHttp\Promise\Create;
+use Illuminate\Support\Facades\Log;
 use Shakewellagency\ContentPortalPdfParser\Features\Tocs\Actions\CreateTocAction;
 
 class ParseTOCAction
@@ -24,6 +25,9 @@ class ParseTOCAction
             $rendition->tocs()->forceDelete();
             $rendition->refresh();
         }
+
+        Log::warning("line 29 done");
+
         
         $renditionId = $rendition->id;
         $outline = json_decode($rendition->outline);
@@ -81,7 +85,12 @@ class ParseTOCAction
                 'order' => $orderCounters[$parentId],
             ];
 
+            Log::warning("line page_no:$pageNo");
+
             $toc = (new CreateTocAction)->execute($payload);
+            $toc->refresh();
+
+            Log::warning("toc created");
 
             $orderCounters[$parentId]++;
 

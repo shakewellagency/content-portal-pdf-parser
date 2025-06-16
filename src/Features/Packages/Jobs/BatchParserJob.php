@@ -24,7 +24,6 @@ use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPagePars
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\PageFontColorATagAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\ParseContentValueAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\ParseTOCAction;
-use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\RemoveLastHRTagAction;
 
 class BatchParserJob implements ShouldQueue
 {
