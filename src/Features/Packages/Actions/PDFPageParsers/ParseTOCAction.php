@@ -20,7 +20,6 @@ class ParseTOCAction
         $renditionId = $rendition->id;
         $outline = json_decode($rendition->outline);
 
-        // return $outline;
         libxml_use_internal_errors(true); // handle HTML5 issues safely
 
         $dom = new DOMDocument();
