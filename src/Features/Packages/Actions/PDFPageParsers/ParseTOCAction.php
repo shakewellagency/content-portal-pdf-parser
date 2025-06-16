@@ -85,12 +85,13 @@ class ParseTOCAction
                 'order' => $orderCounters[$parentId],
             ];
 
-            Log::warning("line page_no:$pageNo");
+            $a = json_encode($payload);
+            Log::warning("payload: $a");
 
             $toc = (new CreateTocAction)->execute($payload);
             $toc->refresh();
 
-            Log::warning("toc created");
+            Log::warning("toc created, toc: $toc->id");
 
             $orderCounters[$parentId]++;
 
