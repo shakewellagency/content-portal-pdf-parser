@@ -18,7 +18,6 @@ class ParserServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->listener();
-        $this->registerObservers();
 
         $this->publishes([
             __DIR__.'/../databases/migrations' => database_path('migrations'),
@@ -55,14 +54,5 @@ class ParserServiceProvider extends ServiceProvider
             ParsingFailedEvent::class,
             SendEmailNotificationListener::class
         );
-    }
-
-    protected function registerObservers()
-    {
-        $renditionModel = config('shakewell-parser.models.rendition_model');
-        
-        if ($renditionModel) {
-            $renditionModel::observe(RenditionObserver::class);
-        }
     }
 }
