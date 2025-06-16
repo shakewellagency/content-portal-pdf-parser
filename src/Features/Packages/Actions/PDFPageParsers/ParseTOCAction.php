@@ -3,7 +3,7 @@
 namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers;
 
 use DOMDocument;
-use GuzzleHttp\Promise\Create;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Shakewellagency\ContentPortalPdfParser\Features\Tocs\Actions\CreateTocAction;
 
@@ -11,7 +11,6 @@ class ParseTOCAction
 {
     public function execute($rendition, $package)
     {
-
         $rendition->refresh();
 
         if (!$rendition->outline) {
@@ -26,9 +25,6 @@ class ParseTOCAction
             $rendition->refresh();
         }
 
-        Log::warning("line 29 done");
-
-        
         $renditionId = $rendition->id;
         $outline = json_decode($rendition->outline);
 
@@ -38,15 +34,17 @@ class ParseTOCAction
         $dom->loadHTML($outline);
 
         $body = $dom->getElementsByTagName('body')->item(0);
-
         $uls = $body->getElementsByTagName('ul');
+
         if ($uls->length > 0) {
-            $this->processList($uls->item(0),null, $renditionId);
+            // Wrap the entire recursive insert in a transaction
+            DB::transaction(function () use ($uls, $renditionId) {
+                $orderCounters = [];
+                $this->processList($uls->item(0), null, $renditionId, $orderCounters);
+            }, 3); // 3 retry attempts on deadlock
         }
 
         libxml_clear_errors();
-
-        
     }
 
     public function processList($ul, $parentId = null, $renditionId, &$orderCounters = [])
@@ -72,7 +70,7 @@ class ParseTOCAction
             preg_match('/#page(\d+)-div/', $aTag->getAttribute('href'), $pageMatch);
             $pageNo = $pageMatch[1] ?? null;
 
-            // Clean up non-printable characters
+            // Clean name string
             $cleanName = preg_replace('/[[:^print:]]+/', '', $name);
             $cleanName = trim($cleanName);
             $cleanName = preg_replace('/(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/', ' ', $cleanName);
@@ -85,22 +83,19 @@ class ParseTOCAction
                 'order' => $orderCounters[$parentId],
             ];
 
-            $a = json_encode($payload);
-            Log::warning("payload: $a");
-
-            $toc = (new CreateTocAction)->execute($payload);
+            // Use retry around CreateTocAction to handle deadlocks
+            $toc = retry(3, function () use ($payload) {
+                return (new CreateTocAction)->execute($payload);
+            }, 100); // 3 retries, 100ms delay between
 
             if (!$toc->id) {
-                usleep(50000);
-                $toc->refresh();
+                Log::error("Failed to create TOC entry after retries.", $payload);
+                continue;
             }
-
-            $b = json_encode($toc);
-            Log::warning("toc created, toc: $b");
 
             $orderCounters[$parentId]++;
 
-            // Now look for immediate child <ul> elements under this <li>
+            // Now process children <ul> under this <li>
             foreach ($li->childNodes as $child) {
                 if ($child->nodeName === 'ul') {
                     $this->processList($child, $toc->id, $renditionId, $orderCounters);
@@ -108,5 +103,4 @@ class ParseTOCAction
             }
         }
     }
-
 }
