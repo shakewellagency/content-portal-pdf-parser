@@ -91,7 +91,8 @@ class ParseTOCAction
             $toc = (new CreateTocAction)->execute($payload);
             $toc->refresh();
 
-            Log::warning("toc created, toc: $toc->id");
+            $b = json_encode($toc);
+            Log::warning("toc created, toc: $b");
 
             $orderCounters[$parentId]++;
 
