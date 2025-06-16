@@ -107,7 +107,7 @@ class BatchParserJob implements ShouldQueue
             Log::info("DONE Parsing Page {$page}");
         }
 
-        (new ParseTOCAction)->execute($this->rendition);
+        // (new ParseTOCAction)->execute($this->rendition);
         $totalParsedPage = $this->rendition->renditionPages->where('is_parsed', 1)->count();
 
         if ($this->package->total_pages == $totalParsedPage) {
