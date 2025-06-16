@@ -9,6 +9,7 @@ use Shakewellagency\ContentPortalPdfParser\Events\ParsingFinishedEvent;
 use Shakewellagency\ContentPortalPdfParser\Events\ParsingStartedEvent;
 use Shakewellagency\ContentPortalPdfParser\Events\ParsingTriggerEvent;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Helpers\ModifyPublishedNamespaceHelper;
+use Shakewellagency\ContentPortalPdfParser\Features\Renditions\Observers\RenditionObserver;
 use Shakewellagency\ContentPortalPdfParser\Listeners\SendEmailNotificationListener;
 
 class ParserServiceProvider extends ServiceProvider
@@ -17,6 +18,7 @@ class ParserServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->listener();
+        $this->registerObservers();
 
         $this->publishes([
             __DIR__.'/../databases/migrations' => database_path('migrations'),
@@ -53,5 +55,14 @@ class ParserServiceProvider extends ServiceProvider
             ParsingFailedEvent::class,
             SendEmailNotificationListener::class
         );
+    }
+
+    protected function registerObservers()
+    {
+        $renditionModel = config('shakewell-parser.models.rendition_model');
+        
+        if ($renditionModel) {
+            $renditionModel::observe(RenditionObserver::class);
+        }
     }
 }

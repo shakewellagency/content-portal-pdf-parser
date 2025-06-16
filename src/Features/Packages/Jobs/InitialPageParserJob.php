@@ -41,7 +41,6 @@ class InitialPageParserJob implements ShouldQueue
     {
        $rendition = (new OutlineParseAction)->execute($this->renditionPage, $this->rendition);
        $rendition->refresh();
-       (new ParseTOCAction)->execute($rendition);
 
        (new CoverPhotoAction)->execute(
             $this->renditionPage, 

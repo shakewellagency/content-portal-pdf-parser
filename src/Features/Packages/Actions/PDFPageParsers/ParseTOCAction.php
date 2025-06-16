@@ -11,11 +11,17 @@ class ParseTOCAction
     public function execute($rendition)
     {
 
+        if (!$rendition->outline) {
+            LoggerInfo('No Outline to Parse.', [
+                'rendition' => $rendition->toArray(),
+            ]);
+            return;
+        }
+
         if ($rendition->tocs->isNotEmpty()) {
             $rendition->tocs()->forceDelete();
             $rendition->refresh();
         }
-
         
         $renditionId = $rendition->id;
         $outline = json_decode($rendition->outline);
