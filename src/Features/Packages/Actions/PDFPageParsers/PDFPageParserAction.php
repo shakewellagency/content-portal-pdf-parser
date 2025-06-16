@@ -46,11 +46,7 @@ class PDFPageParserAction
                 $htmlString = $page == 1 ? $htmlString : ContentParserHelper::removeOutline($htmlString);
 
                 $renditionPage->content = json_encode($htmlString);
-
-                if ($htmlString) {
-                    $renditionPage->original_content = json_encode($htmlString);
-                }
-                
+                // $renditionPage->original_content = json_encode($htmlString);
                 $renditionPage->is_parsed = true;
                 $renditionPage->save();
             }
