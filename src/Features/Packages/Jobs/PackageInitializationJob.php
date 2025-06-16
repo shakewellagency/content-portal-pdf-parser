@@ -53,13 +53,13 @@ class PackageInitializationJob implements ShouldQueue
        
         $this->package = (new GenerateHashAction)->execute($this->package);
         $parserFile = (new GetS3ParserFileTempAction)->execute($this->package);
-        $totalPages = (new PDFPageCounterAction)->execute($parserFile);
+        $totalPages = (new PDFPageCounterAction)->execute($parserFile, $this->package);
         $this->package->total_pages = $totalPages;
         $this->package->save();
 
         unlink($parserFile);
 
-        LoggerInfo('Successfully initialized the package', [
+        LoggerInfo("package:{$this->package->id} - Successfully initialized the package", [
             'package' => $this->package,
             'version' => $this->version,
         ]);

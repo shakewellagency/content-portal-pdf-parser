@@ -27,7 +27,7 @@ class PDFPageParserAction
         
         if ($return_var !== 0) {
             fclose($tempHtmlFile);
-            LoggerInfo('Failed to Convert the PDF Page to HTML', [
+            LoggerInfo("package:$package->id - Failed to Convert the PDF Page to HTML", [
                 'package' => $package->toArray(),
                 'renditionPage' => $renditionPage,
             ]);
@@ -46,7 +46,7 @@ class PDFPageParserAction
                 $htmlString = $page == 1 ? $htmlString : ContentParserHelper::removeOutline($htmlString);
 
                 $renditionPage->content = json_encode($htmlString);
-                $renditionPage->original_content = json_encode($htmlString);
+                // $renditionPage->original_content = json_encode($htmlString);
                 $renditionPage->is_parsed = true;
                 $renditionPage->save();
             }

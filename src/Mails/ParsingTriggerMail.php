@@ -43,7 +43,7 @@ class ParsingTriggerMail extends Mailable
     {
         $markdown = 'mails.PDFParserMail.parsing-triggered';
 
-        LoggerInfo('Trigger Mail has been sent', [
+        LoggerInfo("package:{$this->package->id} - Trigger Mail has been sent", [
             'triggerDate' => Carbon::now()->timezone(config('shakewell-parser.timezone')),
             'publicationNo' => $this->version->publication->publication_no,
             'versionInfo' => $this->version->version_meta,

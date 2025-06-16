@@ -45,7 +45,7 @@ class PageParserJob implements ShouldQueue
     {
         $this->rendition = $this->createRendition();
         
-        LoggerInfo('Successfully created rendition', [
+        LoggerInfo("package:{$this->package->id} - Successfully created rendition", [
             'package' => $this->package->toArray(),
             'rendition' => $this->rendition,
         ]);

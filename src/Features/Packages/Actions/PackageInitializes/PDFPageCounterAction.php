@@ -7,13 +7,13 @@ use Symfony\Component\Process\Process;
 
 class PDFPageCounterAction
 {
-    public function execute($parserFile)
+    public function execute($parserFile, $package)
     {
         $process = new Process(['pdfinfo', $parserFile]);
         $process->run();
 
         if (!$process->isSuccessful()) {
-            LoggerInfo('Failed to parsed the total page counter.', [
+            LoggerInfo("package:$package->id - Failed to parsed the total page counter.", [
                 'parserFile' => $parserFile
             ]);
             throw new PageCounterException('A system error occurred while parsing the page count.');
@@ -22,7 +22,7 @@ class PDFPageCounterAction
         preg_match('/Pages:\s+(\d+)/', $output, $matches);
         $totalPages = isset($matches[1]) ? (int)$matches[1] : 0;
 
-        LoggerInfo('PDF parsed the total page counter.', [
+        LoggerInfo("package:$package->id - PDF parsed the total page counter.", [
             'totalPages' => $totalPages,
             'parserFile' => $parserFile
         ]);

@@ -37,7 +37,7 @@ class GenerateHashAction
         $package->save();
         $package->refresh();
         
-        LoggerInfo('File Hash has been generated.', [
+        LoggerInfo("package:$package->id - File Hash has been generated.", [
             'package' => $package->toArray(),
         ]);
        

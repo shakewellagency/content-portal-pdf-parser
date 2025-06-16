@@ -43,7 +43,7 @@ class ParsingFailedMail extends Mailable
     {
         $markdown = 'mails.PDFParserMail.parsing-failed';
 
-        LoggerInfo('Failed Mail has been sent', [
+        LoggerInfo("package:{$this->package->id} - Failed Mail has been sent", [
             'package' => $this->package->toArray(),
             'publicationNo' => $this->version->publication->publication_no,
             'versionInfo' => $this->version->version_meta,

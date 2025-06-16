@@ -133,7 +133,7 @@ class PDFPageParserJob implements ShouldQueue
             unlink($this->parserFile);
         }
 
-        LoggerInfo('Successfully parsed the PDF', [
+        LoggerInfo("package:{$this->package->id} - Successfully parsed the PDF", [
             'package' => $this->package,
         ]);
 

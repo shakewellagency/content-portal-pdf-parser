@@ -13,7 +13,7 @@ class GetS3ParserFileTempAction
         $fileContent = Storage::disk(config('shakewell-parser.s3'))->get($package->file_path);
         
         if (!$fileContent) {
-            LoggerInfo('PDF does not exist on S3.', [
+            LoggerInfo("package:$package->id - PDF does not exist on S3.", [
                 'package' => $package->toArray(),
             ]);
             throw new FilePathNotFoundException('PDF does not exist on S3');

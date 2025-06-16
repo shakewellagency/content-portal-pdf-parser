@@ -68,7 +68,8 @@ class BatchParserJob implements ShouldQueue
 
         [$startPage, $endPage] = $this->pageRange;
 
-        LoggerInfo("Start Parsing Batch from: {$startPage} to: {$endPage}", [
+        $packageId = $this->package->id;
+        LoggerInfo("package:$packageId - Start Parsing Batch from: {$startPage} to: {$endPage}", [
             'package' => $this->package->toArray(),
             'rendition' => $this->rendition,
         ]);
@@ -107,11 +108,11 @@ class BatchParserJob implements ShouldQueue
             Log::info("DONE Parsing Page {$page}");
         }
 
-        // (new ParseTOCAction)->execute($this->rendition);
+        // (new ParseTOCAction)->execute($this->rendition, $this->package);
         $totalParsedPage = $this->rendition->renditionPages->where('is_parsed', 1)->count();
 
         if ($this->package->total_pages == $totalParsedPage) {
-            LoggerInfo("DONE Parsing All Pages", [
+            LoggerInfo("package:$packageId - DONE Parsing All Pages", [
                 'package' => $this->package->toArray(),
                 'rendition' => $this->rendition,
             ]);
@@ -120,8 +121,8 @@ class BatchParserJob implements ShouldQueue
 
         unlink($parserFile);
 
-        Log::info("DONE Parsing Batch from: {$startPage} to: {$endPage}");
-        LoggerInfo("DONE Parsing Batch from: {$startPage} to: {$endPage}", [
+        Log::info("package:$packageId - DONE Parsing Batch from: {$startPage} to: {$endPage}");
+        LoggerInfo("package:$packageId - DONE Parsing Batch from: {$startPage} to: {$endPage}", [
             'package' => $this->package->toArray(),
             'rendition' => $this->rendition,
         ]);
@@ -151,7 +152,7 @@ class BatchParserJob implements ShouldQueue
 
         (new SetVersionCurrentAction)->execute($this->version, $this->rendition);
 
-        LoggerInfo('Successfully parsed the PDF', [
+        LoggerInfo("package:{$this->package->id} - Successfully parsed the PDF", [
             'package' => $this->package,
         ]);
 
