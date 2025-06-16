@@ -21,6 +21,7 @@ class TOCDotAlignAction
                 $aTags = $pTag->getElementsByTagName('a');
 
                 if ($aTags->length > 0) {
+                    $class = $pTag->getAttribute('class') ?: 'ft01';
                     $style = $pTag->getAttribute('style');
                     preg_match('/top:\s*([\d\.]+)px/', $style, $topMatch);
                     preg_match('/left:\s*([\d\.]+)px/', $style, $leftMatch);
@@ -38,7 +39,7 @@ class TOCDotAlignAction
                         $items = $this->getLabelAndPageNumber($linkText, $href);
 
                         foreach ($items as $item) {
-                            $div = $this->createDivBlock($dom, $item, $leftValue, $currentTop);
+                            $div = $this->createDivBlock($dom, $item, $leftValue, $currentTop, $class);
                             $fragment->appendChild($div);
                             $currentTop += 18;
                         }
@@ -77,7 +78,7 @@ class TOCDotAlignAction
         return $results;
     }
 
-    private function createDivBlock($dom, $item, $leftValue, $topValue)
+    private function createDivBlock($dom, $item, $leftValue, $topValue, $class)
     {
         $label = htmlspecialchars($item['label']);
         $page = $item['page'];
@@ -85,7 +86,7 @@ class TOCDotAlignAction
 
         $div = $dom->createElement('div');
         $div->setAttribute('style', "position:absolute; top:{$topValue}px; left:{$leftValue}px; display:flex; justify-content:space-between; width: calc((100% - {$leftValue}px) * 0.931);");
-        $div->setAttribute('class', 'ft01');
+        $div->setAttribute('class', $class);
 
         $a = $dom->createElement('a');
         $a->setAttribute('href', $href);
