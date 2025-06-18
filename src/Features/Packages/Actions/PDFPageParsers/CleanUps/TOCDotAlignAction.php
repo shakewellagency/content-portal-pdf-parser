@@ -41,7 +41,7 @@ class TOCDotAlignAction
                         foreach ($items as $item) {
                             $div = $this->createDivBlock($dom, $item, $leftValue, $currentTop, $class);
                             $fragment->appendChild($div);
-                            $currentTop += 18;
+                            $currentTop += 24;
                         }
                     }
 
@@ -95,7 +95,7 @@ class TOCDotAlignAction
         $a->appendChild($pLabel);
 
         $pDotted = $dom->createElement('p');
-        $pDotted->setAttribute('style', 'flex:1; border-bottom:2px dotted #000; margin:4px 2px;');
+        $pDotted->setAttribute('style', 'flex:1; border-bottom:3.5px dotted #000; margin:4px 2px;');
 
         $pPage = $dom->createElement('p', $page);
 
