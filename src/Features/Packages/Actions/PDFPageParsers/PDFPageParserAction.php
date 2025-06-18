@@ -22,7 +22,7 @@ class PDFPageParserAction
         $tempHtmlPath = $tempHtml .'_page_'.$page. '.html';
         rename($tempHtml, $tempHtmlPath);
 
-        $command = "pdftohtml -c -hidden -noframes -f {$page} -l {$page} -zoom 1.5 {$parserFile} {$tempHtmlPath}";
+        $command = "pdftohtml -c -hidden -noframes -f {$page} -l {$page} -zoom 2.78 {$parserFile} {$tempHtmlPath}";
         exec($command . ' 2>&1', $output, $return_var);
         
         if ($return_var !== 0) {
