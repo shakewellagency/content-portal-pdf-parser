@@ -41,7 +41,7 @@ class TOCDotAlignAction
                         foreach ($items as $item) {
                             $div = $this->createDivBlock($dom, $item, $leftValue, $currentTop, $class);
                             $fragment->appendChild($div);
-                            $currentTop += 24;
+                            $currentTop += 32;
                         }
                     }
 
