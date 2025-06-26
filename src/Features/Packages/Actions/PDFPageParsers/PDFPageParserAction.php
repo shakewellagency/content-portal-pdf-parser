@@ -55,7 +55,7 @@ class PDFPageParserAction
             if ($extension != 'html') {
                 $renditionAssetTypeEnum = config('shakewell-parser.enums.rendition_asset_type_enum');
                 Storage::disk(config('shakewell-parser.s3'))->put($s3Path, file_get_contents($file));
-                $this->createAsset($renditionPage->rendition_id, $filename, $renditionAssetTypeEnum::Image->value, $s3Path);
+                $this->createAsset($renditionPage->rendition_id, $filename, $renditionAssetTypeEnum::Image->value, $s3Path, $page);
             }
 
             unlink($file);
@@ -64,12 +64,13 @@ class PDFPageParserAction
         return $renditionPage;
     }
 
-    private function createAsset($renditionId, $fileName, $fileType, $filePath) 
+    private function createAsset($renditionId, $fileName, $fileType, $filePath, $page) 
     {
         $renditionAssetModel = config('shakewell-parser.models.rendition_asset_model');
         $asset = new $renditionAssetModel;
         $asset->rendition_id = $renditionId;
         $asset->type = $fileType;
+        $asset->page_no = $page;
         $asset->file_name = $fileName;
         $asset->file_path = $filePath;
         $asset->save();
