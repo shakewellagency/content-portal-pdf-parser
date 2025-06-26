@@ -22,5 +22,5 @@ return [
         'rendition_type_enum' => '', //App\Features\Renditions\Enums\RenditionTypeEnum::class,
     ],
     'timezone' => 'Australia/Sydney',
-    'emails' => env('PARSER_EMAILS', 'kylyn.l@shakewell.agency'), 
+    'emails' => fn() => app('parser.emails'),
 ];
