@@ -41,7 +41,7 @@ class SendEmailNotificationListener
             default => throw new \Exception('Unexpected match value'),
         };
 
-        $emails = value(config('shakewell-parser.emails'));
+        $emails = 'kylyn.l@shakewell.agency';
         $destinations = [];
 
         foreach ($emails as $email) {
