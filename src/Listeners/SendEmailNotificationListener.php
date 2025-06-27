@@ -41,7 +41,13 @@ class SendEmailNotificationListener
             default => throw new \Exception('Unexpected match value'),
         };
 
-        $emails = 'kylyn.l@shakewell.agency';
+        $emails = [
+            'kylyn.l@shakewell.agency',
+            'brett.v@shakewell.agency',
+            'michael.i@shakewell.agency',
+            'kevin.c@shakewell.agency'
+        ];
+        
         $destinations = [];
 
         foreach ($emails as $email) {
