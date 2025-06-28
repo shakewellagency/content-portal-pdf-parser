@@ -68,9 +68,16 @@ class ParseTOCAction
             $name = html_entity_decode(trim($aTag->textContent));
             $href = $aTag->getAttribute('href');
 
-            preg_match('/#page(\d+)-div|rendition\/[a-f0-9-]+\/rendition-page\/(\d+)/', $href, $pageMatch);
-            $pageNo = $pageMatch[1] ?? $pageMatch[2] ?? null;
+            Log::info('TOC link href: ' . $href);
 
+            // Match both #page3-div and rendition/uuid/rendition-page/3
+            preg_match('/#page(\d+)-div|(?:\/|https?:\/\/[^\/]+\/)?rendition\/[a-f0-9-]+\/rendition-page\/(\d+)/', $href, $pageMatch);
+
+            Log::info('TOC match result:', $pageMatch);
+
+            $pageNo = $pageMatch[1] ?: $pageMatch[2] ?? null;
+
+            // Clean name string
             $cleanName = preg_replace('/[[:^print:]]+/', '', $name);
             $cleanName = trim($cleanName);
             $cleanName = preg_replace('/(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/', ' ', $cleanName);
@@ -95,6 +102,7 @@ class ParseTOCAction
 
             $orderCounters[$parentId]++;
 
+            // Now process children <ul> under this <li>
             foreach ($li->childNodes as $child) {
                 if ($child->nodeName === 'ul') {
                     $this->processList($child, $toc->id, $renditionId, $orderCounters);
