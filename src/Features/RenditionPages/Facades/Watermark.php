@@ -56,7 +56,7 @@ class Watermark
             height: 100%;
             pointer-events: none;
             z-index: 9999;
-            height: 74rem;
+            height: 137rem;
             text-align: center;
             display: flex;
             justify-content: center;
