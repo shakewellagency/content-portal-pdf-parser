@@ -66,10 +66,11 @@ class ParseTOCAction
             if (!$aTag) continue;
 
             $name = html_entity_decode(trim($aTag->textContent));
-            preg_match('/#page(\d+)-div/', $aTag->getAttribute('href'), $pageMatch);
-            $pageNo = $pageMatch[1] ?? null;
+            $href = $aTag->getAttribute('href');
 
-            // Clean name string
+            preg_match('/#page(\d+)-div|rendition\/[a-f0-9-]+\/rendition-page\/(\d+)/', $href, $pageMatch);
+            $pageNo = $pageMatch[1] ?? $pageMatch[2] ?? null;
+
             $cleanName = preg_replace('/[[:^print:]]+/', '', $name);
             $cleanName = trim($cleanName);
             $cleanName = preg_replace('/(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/', ' ', $cleanName);
@@ -94,7 +95,6 @@ class ParseTOCAction
 
             $orderCounters[$parentId]++;
 
-            // Now process children <ul> under this <li>
             foreach ($li->childNodes as $child) {
                 if ($child->nodeName === 'ul') {
                     $this->processList($child, $toc->id, $renditionId, $orderCounters);
@@ -102,4 +102,5 @@ class ParseTOCAction
             }
         }
     }
+
 }
