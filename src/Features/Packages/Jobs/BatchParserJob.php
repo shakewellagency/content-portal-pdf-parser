@@ -96,15 +96,15 @@ class BatchParserJob implements ShouldQueue
             //     );
             // }
 
-            if ($renditionPage) {
-                (new PageAssetDataIDAction)->execute($renditionPage);
-                (new PageDeepLinkAction)->execute($renditionPage);
-                (new PageFontColorATagAction)->execute($renditionPage);
-                (new ExtractHeightWidthAction)->execute($renditionPage);
-                (new HTMLCleanUps)->execute($renditionPage);
-                (new ParseContentValueAction)->execute($renditionPage);
-                $renditionPage->refresh();
-            }
+            // if ($renditionPage) {
+            //     (new PageAssetDataIDAction)->execute($renditionPage);
+            //     (new PageDeepLinkAction)->execute($renditionPage);
+            //     (new PageFontColorATagAction)->execute($renditionPage);
+            //     (new ExtractHeightWidthAction)->execute($renditionPage);
+            //     (new HTMLCleanUps)->execute($renditionPage);
+            //     (new ParseContentValueAction)->execute($renditionPage);
+            //     $renditionPage->refresh();
+            // }
 
             Log::info("DONE Parsing Page {$page}");
         }
