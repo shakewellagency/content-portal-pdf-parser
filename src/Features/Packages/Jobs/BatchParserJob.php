@@ -96,6 +96,11 @@ class BatchParserJob implements ShouldQueue
                 );
             }
 
+            LoggerInfo("package:$packageId - Parsed Page {$page}", [
+                'package' => $this->package->toArray(),
+                'renditionPage' => $renditionPage,
+            ]);
+
             if ($renditionPage) {
                 (new PageAssetDataIDAction)->execute($renditionPage);
                 (new PageDeepLinkAction)->execute($renditionPage);
@@ -104,7 +109,6 @@ class BatchParserJob implements ShouldQueue
                 (new HTMLCleanUps)->execute($renditionPage);
                 (new ParseContentValueAction)->execute($renditionPage);
                 $renditionPage->refresh();
-
             }
 
             Log::info("DONE Parsing Page {$page}");
