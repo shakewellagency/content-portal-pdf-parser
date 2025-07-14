@@ -80,12 +80,12 @@ class BatchParserJob implements ShouldQueue
         for ($page = $startPage; $page <= $endPage; $page++) {
 
             $renditionPage = $this->createRenditionPage($page);
-            $renditionPage = (new PDFPageParserAction)->execute(
-                $page,
-                $parserFile,
-                $renditionPage,
-                $this->package,
-            );
+            // $renditionPage = (new PDFPageParserAction)->execute(
+            //     $page,
+            //     $parserFile,
+            //     $renditionPage,
+            //     $this->package,
+            // );
 
 
             // if ($page == 1) {
