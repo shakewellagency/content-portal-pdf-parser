@@ -80,31 +80,31 @@ class BatchParserJob implements ShouldQueue
         for ($page = $startPage; $page <= $endPage; $page++) {
 
             $renditionPage = $this->createRenditionPage($page);
-            // $renditionPage = (new PDFPageParserAction)->execute(
-            //     $page,
-            //     $parserFile,
-            //     $renditionPage,
-            //     $this->package,
-            // );
+            $renditionPage = (new PDFPageParserAction)->execute(
+                $page,
+                $parserFile,
+                $renditionPage,
+                $this->package,
+            );
 
 
-            // if ($page == 1) {
-            //     InitialPageParserJob::dispatch(
-            //         $this->package, 
-            //         $renditionPage, 
-            //         $this->rendition
-            //     );
-            // }
+            if ($page == 1) {
+                InitialPageParserJob::dispatch(
+                    $this->package, 
+                    $renditionPage, 
+                    $this->rendition
+                );
+            }
 
-            // if ($renditionPage) {
-            //     (new PageAssetDataIDAction)->execute($renditionPage);
-            //     (new PageDeepLinkAction)->execute($renditionPage);
-            //     (new PageFontColorATagAction)->execute($renditionPage);
-            //     (new ExtractHeightWidthAction)->execute($renditionPage);
-            //     (new HTMLCleanUps)->execute($renditionPage);
-            //     (new ParseContentValueAction)->execute($renditionPage);
-            //     $renditionPage->refresh();
-            // }
+            if ($renditionPage) {
+                (new PageAssetDataIDAction)->execute($renditionPage);
+                (new PageDeepLinkAction)->execute($renditionPage);
+                (new PageFontColorATagAction)->execute($renditionPage);
+                (new ExtractHeightWidthAction)->execute($renditionPage);
+                (new HTMLCleanUps)->execute($renditionPage);
+                (new ParseContentValueAction)->execute($renditionPage);
+                $renditionPage->refresh();
+            }
 
             Log::info("DONE Parsing Page {$page}");
         }
