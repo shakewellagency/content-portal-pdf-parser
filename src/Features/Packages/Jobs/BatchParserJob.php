@@ -88,18 +88,13 @@ class BatchParserJob implements ShouldQueue
             );
 
 
-            if ($page == 1) {
-                InitialPageParserJob::dispatch(
-                    $this->package, 
-                    $renditionPage, 
-                    $this->rendition
-                );
-            }
-
-            LoggerInfo("package:$packageId - Parsed Page {$page}", [
-                'package' => $this->package->toArray(),
-                'renditionPage' => $renditionPage,
-            ]);
+            // if ($page == 1) {
+            //     InitialPageParserJob::dispatch(
+            //         $this->package, 
+            //         $renditionPage, 
+            //         $this->rendition
+            //     );
+            // }
 
             if ($renditionPage) {
                 (new PageAssetDataIDAction)->execute($renditionPage);
