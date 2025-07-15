@@ -44,22 +44,38 @@ class PDFPageParserAction
             if ($extension === 'html') {
                 $htmlString = file_get_contents($file);
 
-                $htmlString = $page == 1 ? $htmlString : ContentParserHelper::removeOutline($htmlString);
+                // Ensure UTF-8 encoding
+                $htmlString = mb_convert_encoding($htmlString, 'UTF-8', 'UTF-8');
 
+                // Replace invalid href values
                 $htmlString = preg_replace('/href="��"/', 'href="#"', $htmlString);
 
-                $renditionPage->content = json_encode($htmlString);
-                if (json_last_error() !== JSON_ERROR_NONE) {
+                // Remove outline if not on page 1
+                $htmlString = $page == 1 ? $htmlString : ContentParserHelper::removeOutline($htmlString);
+
+                // Optional: check string size if needed
+                if (strlen($htmlString) > 5000000) { // 5MB threshold
+                    Log::error('HTML string too large to encode', [
+                        'size' => strlen($htmlString),
+                        'rendition_page_id' => $renditionPage->id,
+                    ]);
+                    throw new \Exception('HTML string too large to encode');
+                }
+
+                // Encode to JSON and verify result
+                $jsonContent = json_encode($htmlString);
+
+                if ($jsonContent === false) {
                     Log::error('Invalid JSON encoding for rendition page.', [
                         'error' => json_last_error_msg(),
-                        'htmlString' => $htmlString, // optionally truncate or sanitize
                         'rendition_page_id' => $renditionPage->id,
                     ]);
 
-                    // Optionally throw an exception or handle gracefully
                     throw new \Exception('Failed to encode JSON: ' . json_last_error_msg());
                 }
 
+                // Save content and mark as parsed
+                $renditionPage->content = $jsonContent;
                 $renditionPage->is_parsed = true;
                 $renditionPage->save();
             }
