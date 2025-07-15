@@ -35,6 +35,7 @@ class BatchParserJob implements ShouldQueue
     public int $timeout = 7200;
     protected $totalPage;
     protected $packageId;
+    protected $renditionId;
     protected $pageRange;
     protected $cacheKey;
 
@@ -45,9 +46,10 @@ class BatchParserJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct($packageId, $totalPage, $pageRange, $cacheKey)
+    public function __construct($packageId, $renditionId, $totalPage, $pageRange, $cacheKey)
     {
         $this->packageId = $packageId;
+        $this->renditionId = $renditionId;
         $this->totalPage = $totalPage;
         $this->pageRange = $pageRange;
         $this->cacheKey = $cacheKey;
@@ -60,8 +62,10 @@ class BatchParserJob implements ShouldQueue
     {
         $packageModel = config('shakewell-parser.models.package_model');
         $versionModel = config('shakewell-parser.models.version_model');
+        $renditionModel = config('shakewell-parser.models.rendition_model');
+
         $this->package = $packageModel::find($this->packageId);
-        $this->rendition = $this->package->rendition;
+        $this->rendition = $renditionModel::find($this->renditionId);
         $this->version = $versionModel::find($this->rendition->version_id);
 
         if (Cache::get($this->cacheKey)) {
@@ -174,8 +178,10 @@ class BatchParserJob implements ShouldQueue
     {
         $packageModel = config('shakewell-parser.models.package_model');
         $versionModel = config('shakewell-parser.models.version_model');
+        $renditionModel = config('shakewell-parser.models.rendition_model');
+
         $this->package = $packageModel::find($this->packageId);
-        $this->rendition = $this->package->rendition;
+        $this->rendition = $renditionModel::find($this->renditionId);
         $this->version = $versionModel::find($this->rendition->version_id);
 
         if (Cache::get($this->cacheKey)) {
