@@ -34,34 +34,23 @@ class BatchParserJob implements ShouldQueue
 
     public int $timeout = 7200;
     protected $totalPage;
-    protected $package;
+    protected $packageId;
     protected $pageRange;
     protected $cacheKey;
 
+    protected $package;
     protected $rendition;
     protected $version;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($package, $totalPage, $pageRange, $cacheKey)
+    public function __construct($packageId, $totalPage, $pageRange, $cacheKey)
     {
-        $this->package = $package;
-        $this->package->refresh();
+        $this->packageId = $packageId;
         $this->totalPage = $totalPage;
         $this->pageRange = $pageRange;
         $this->cacheKey = $cacheKey;
-        $this->rendition = $package->rendition;
-
-        // fallback for version
-        $versionModel = config('shakewell-parser.models.version_model');
-        if ($this->rendition && $this->rendition->version) {
-            $this->version = $this->rendition->version;
-        } elseif ($this->rendition && $this->rendition->version_id) {
-            $this->version = $versionModel::find($this->rendition->version_id);
-        }else {
-            $this->version = null;
-        }
     }
 
     /**
@@ -69,6 +58,10 @@ class BatchParserJob implements ShouldQueue
      */
     public function handle()
     {
+        $packageModel = config('shakewell-parser.models.package_model');
+        $this->package = $packageModel::find($this->packageId);
+        $this->rendition = $this->package->rendition;
+        $this->version = $this->rendition->version;
 
         if (Cache::get($this->cacheKey)) {
             return;
@@ -178,6 +171,11 @@ class BatchParserJob implements ShouldQueue
 
     public function failed(Throwable $exception)
     {
+        $packageModel = config('shakewell-parser.models.package_model');
+        $this->package = $packageModel::find($this->packageId);
+        $this->rendition = $this->package->rendition;
+        $this->version = $this->rendition->version;
+
         if (Cache::get($this->cacheKey)) {
             return;
         }
