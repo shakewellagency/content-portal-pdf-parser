@@ -52,7 +52,16 @@ class BatchParserJob implements ShouldQueue
         $this->pageRange = $pageRange;
         $this->cacheKey = $cacheKey;
         $this->rendition = $package->rendition;
-        $this->version = $this->rendition->version;
+
+        // fallback for version
+        $versionModel = config('shakewell-parser.models.version_model');
+        if ($this->rendition && $this->rendition->version) {
+            $this->version = $this->rendition->version;
+        } elseif ($this->rendition && $this->rendition->version_id) {
+            $this->version = $versionModel::find($this->rendition->version_id);
+        }else {
+            $this->version = null;
+        }
     }
 
     /**
