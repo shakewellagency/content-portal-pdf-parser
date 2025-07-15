@@ -44,14 +44,20 @@ class PDFPageParserAction
             if ($extension === 'html') {
                 $htmlString = file_get_contents($file);
 
-                Log::warning("Debugging page:{$page}", [
-                        'html' => $htmlString
-                    ]
-                );
-
                 $htmlString = $page == 1 ? $htmlString : ContentParserHelper::removeOutline($htmlString);
                 
                 $renditionPage->content = json_encode($htmlString);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    Log::warning('Invalid JSON encoding for rendition page.', [
+                        'error' => json_last_error_msg(),
+                        'htmlString' => $htmlString, // optionally truncate or sanitize
+                        'rendition_page_id' => $renditionPage->id,
+                    ]);
+
+                    // Optionally throw an exception or handle gracefully
+                    throw new \Exception('Failed to encode JSON: ' . json_last_error_msg());
+                }
+
                 $renditionPage->is_parsed = true;
                 $renditionPage->save();
             }
