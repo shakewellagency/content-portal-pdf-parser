@@ -45,11 +45,6 @@ class PageParserJob implements ShouldQueue
     {
         $this->rendition = $this->createRendition();
 
-        LoggerInfo("package:{$this->package->id} - Successfully created rendition", [
-            'package' => $this->package->toArray(),
-            'rendition' => $this->rendition,
-        ]);
-
         $totalPages = $this->package->total_pages;
 
         $cacheKey = 'job_chain_failure_flag-'. Str::random(10);
@@ -77,8 +72,18 @@ class PageParserJob implements ShouldQueue
         $this->package->refresh();
 
         if ($rendition) {
+            LoggerInfo("package:{$this->package->id} - Fetched existing rendition", [
+                'package' => $this->package->toArray(),
+                'rendition' => $this->rendition,
+            ]);
+
             return $rendition;
         }
+
+        LoggerInfo("package:{$this->package->id} - Successfully created rendition", [
+            'package' => $this->package->toArray(),
+            'rendition' => $this->rendition,
+        ]);
 
         return (new CreateRenditionAction)->execute($parameter);
     }
