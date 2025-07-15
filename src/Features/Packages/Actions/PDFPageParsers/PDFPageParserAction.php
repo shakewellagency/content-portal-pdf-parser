@@ -68,6 +68,7 @@ class PDFPageParserAction
                 if ($jsonContent === false) {
                     Log::error('Invalid JSON encoding for rendition page.', [
                         'error' => json_last_error_msg(),
+                        'htmlString' => $htmlString,
                         'rendition_page_id' => $renditionPage->id,
                     ]);
 
