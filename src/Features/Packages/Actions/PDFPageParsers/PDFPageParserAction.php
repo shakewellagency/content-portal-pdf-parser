@@ -45,10 +45,12 @@ class PDFPageParserAction
                 $htmlString = file_get_contents($file);
 
                 $htmlString = $page == 1 ? $htmlString : ContentParserHelper::removeOutline($htmlString);
-                
+
+                $htmlString = preg_replace('/href="��"/', 'href="#"', $htmlString);
+
                 $renditionPage->content = json_encode($htmlString);
                 if (json_last_error() !== JSON_ERROR_NONE) {
-                    Log::warning('Invalid JSON encoding for rendition page.', [
+                    Log::error('Invalid JSON encoding for rendition page.', [
                         'error' => json_last_error_msg(),
                         'htmlString' => $htmlString, // optionally truncate or sanitize
                         'rendition_page_id' => $renditionPage->id,
