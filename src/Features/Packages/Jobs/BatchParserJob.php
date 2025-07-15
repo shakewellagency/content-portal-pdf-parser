@@ -96,6 +96,8 @@ class BatchParserJob implements ShouldQueue
                 );
             }
 
+            Log::warning("Debugging", $renditionPage);
+
             if ($renditionPage) {
                 (new PageAssetDataIDAction)->execute($renditionPage);
                 (new PageDeepLinkAction)->execute($renditionPage);
