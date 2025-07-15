@@ -44,14 +44,13 @@ class PDFPageParserAction
             if ($extension === 'html') {
                 $htmlString = file_get_contents($file);
 
-                
-
-                $htmlString = $page == 1 ? $htmlString : ContentParserHelper::removeOutline($htmlString);
-                
                 Log::warning("Debugging page:{$page}", [
                         'html' => $htmlString
                     ]
                 );
+
+                $htmlString = $page == 1 ? $htmlString : ContentParserHelper::removeOutline($htmlString);
+                
                 $renditionPage->content = json_encode($htmlString);
                 $renditionPage->is_parsed = true;
                 $renditionPage->save();
