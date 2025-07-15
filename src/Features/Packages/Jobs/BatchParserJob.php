@@ -59,9 +59,10 @@ class BatchParserJob implements ShouldQueue
     public function handle()
     {
         $packageModel = config('shakewell-parser.models.package_model');
+        $versionModel = config('shakewell-parser.models.version_model');
         $this->package = $packageModel::find($this->packageId);
         $this->rendition = $this->package->rendition;
-        $this->version = $this->rendition->version;
+        $this->version = $versionModel::find($this->rendition->version_id);
 
         if (Cache::get($this->cacheKey)) {
             return;
@@ -172,9 +173,10 @@ class BatchParserJob implements ShouldQueue
     public function failed(Throwable $exception)
     {
         $packageModel = config('shakewell-parser.models.package_model');
+        $versionModel = config('shakewell-parser.models.version_model');
         $this->package = $packageModel::find($this->packageId);
         $this->rendition = $this->package->rendition;
-        $this->version = $this->rendition->version;
+        $this->version = $versionModel::find($this->rendition->version_id);
 
         if (Cache::get($this->cacheKey)) {
             return;
