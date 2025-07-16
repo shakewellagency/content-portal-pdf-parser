@@ -44,11 +44,8 @@ class PDFPageParserAction
             if ($extension === 'html') {
                 $htmlString = file_get_contents($file);
 
-                // Ensure UTF-8 encoding
-                $htmlString = mb_convert_encoding($htmlString, 'UTF-8', 'UTF-8');
-
-                // Replace invalid href values
-                $htmlString = preg_replace('/href="��"/', 'href="#"', $htmlString);
+                // Clean invalid UTF-8 sequences without altering valid content
+                $htmlString = iconv('UTF-8', 'UTF-8//IGNORE', $htmlString);
 
                 // Remove outline if not on page 1
                 $htmlString = $page == 1 ? $htmlString : ContentParserHelper::removeOutline($htmlString);
