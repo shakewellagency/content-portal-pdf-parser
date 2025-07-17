@@ -19,10 +19,7 @@ class TOCDotAlignAction
             // Standard TOC format with dots
             if (preg_match('/\.{5,}/', $textContent)) {
                 $hasTOC = true;
-                $fragment = $this->handleStandardTOC($dom, $pTag, $aTags);
-                if ($fragment) {
-                    $pTag->parentNode->replaceChild($fragment, $pTag);
-                }
+                $this->handleStandardTOC($dom, $pTag, $aTags);
             }
 
             // Alternate TOC format: one <a> tag with embedded label + page (e.g., "TITLE PAGE .......... TP-1")
@@ -44,30 +41,33 @@ class TOCDotAlignAction
 
     protected function handleStandardTOC($dom, $pTag, $aTags)
     {
-        $class = $pTag->getAttribute('class') ?: 'ft01';
-        $style = $pTag->getAttribute('style');
-        preg_match('/top:\s*([\d\.]+)px/', $style, $topMatch);
-        preg_match('/left:\s*([\d\.]+)px/', $style, $leftMatch);
+        if ($aTags->length > 0) {
+            $class = $pTag->getAttribute('class') ?: 'ft01';
+            $style = $pTag->getAttribute('style');
+            preg_match('/top:\s*([\d\.]+)px/', $style, $topMatch);
+            preg_match('/left:\s*([\d\.]+)px/', $style, $leftMatch);
 
-        $topValue = isset($topMatch[1]) ? (float) $topMatch[1] : 0;
-        $leftValue = isset($leftMatch[1]) ? (float) $leftMatch[1] : 0;
-        $currentTop = $topValue;
+            $topValue = isset($topMatch[1]) ? (float) $topMatch[1] : 0;
+            $leftValue = isset($leftMatch[1]) ? (float) $leftMatch[1] : 0;
+            $currentTop = $topValue;
 
-        $fragment = $dom->createDocumentFragment();
+            $fragment = $dom->createDocumentFragment();
 
-        foreach ($aTags as $aTag) {
-            $linkText = str_replace("\u{A0}", ' ', $aTag->textContent);
-            $href = $aTag->getAttribute('href');
-            $items = $this->getLabelAndPageNumber($linkText, $href);
+            foreach ($aTags as $aTag) {
+                $linkText = $aTag->textContent;
+                $href = $aTag->getAttribute('href');
+                $linkText = str_replace("\u{A0}", ' ', $linkText);
+                $items = $this->getLabelAndPageNumber($linkText, $href);
 
-            foreach ($items as $item) {
-                $div = $this->createDivBlock($dom, $item, $leftValue, $currentTop, $class);
-                $fragment->appendChild($div);
-                $currentTop += 36;
+                foreach ($items as $item) {
+                    $div = $this->createDivBlock($dom, $item, $leftValue, $currentTop, $class);
+                    $fragment->appendChild($div);
+                    $currentTop += 36;
+                }
             }
-        }
 
-        return $fragment;
+            $pTag->parentNode->replaceChild($fragment, $pTag);
+        }
     }
 
     protected function handleAlternateTOC($dom, $pTag, $aTag)
