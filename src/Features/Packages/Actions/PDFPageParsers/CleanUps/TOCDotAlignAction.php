@@ -14,9 +14,7 @@ class TOCDotAlignAction
         $xpath = new \DOMXPath($dom);
         $pTags = $xpath->query('//p');
 
-        Log::warning('rendition page TOC', [
-            'content' => $renditionPage->content,
-        ]);
+
 
         foreach ($pTags as $pTag) {
             $textContent = $pTag->textContent;
