@@ -8,48 +8,73 @@ class TOCDotAlignAction
 {
 
     public function execute($dom, $renditionPage)
-    {   
-
+    {
         $hasTOC = false;
         $xpath = new \DOMXPath($dom);
         $pTags = $xpath->query('//p');
 
-
-
         foreach ($pTags as $pTag) {
-            $textContent = $pTag->textContent;
+            $textContent = trim($pTag->textContent);
+            $aTags = $pTag->getElementsByTagName('a');
 
+            // CASE 1: Dotted TOC
             if (preg_match('/\.{5,}/', $textContent)) {
                 $hasTOC = true;
-                $aTags = $pTag->getElementsByTagName('a');
+                $class = $pTag->getAttribute('class') ?: 'ft01';
+                $style = $pTag->getAttribute('style');
+                preg_match('/top:\s*([\d\.]+)px/', $style, $topMatch);
+                preg_match('/left:\s*([\d\.]+)px/', $style, $leftMatch);
 
-                if ($aTags->length > 0) {
-                    $class = $pTag->getAttribute('class') ?: 'ft01';
-                    $style = $pTag->getAttribute('style');
-                    preg_match('/top:\s*([\d\.]+)px/', $style, $topMatch);
-                    preg_match('/left:\s*([\d\.]+)px/', $style, $leftMatch);
+                $topValue = isset($topMatch[1]) ? (float) $topMatch[1] : 0;
+                $leftValue = isset($leftMatch[1]) ? (float) $leftMatch[1] : 0;
+                $currentTop = $topValue;
 
-                    $topValue = isset($topMatch[1]) ? (float) $topMatch[1] : 0;
-                    $leftValue = isset($leftMatch[1]) ? (float) $leftMatch[1] : 0;
-                    $currentTop = $topValue;
+                $fragment = $dom->createDocumentFragment();
 
-                    $fragment = $dom->createDocumentFragment();
+                foreach ($aTags as $aTag) {
+                    $linkText = $aTag->textContent;
+                    $href = $aTag->getAttribute('href');
+                    $linkText = str_replace("\u{A0}", ' ', $linkText);
+                    $items = $this->getLabelAndPageNumber($linkText, $href);
 
-                    foreach ($aTags as $aTag) {
-                        $linkText = $aTag->textContent;
-                        $href = $aTag->getAttribute('href');
-                        $linkText = str_replace("\u{A0}", ' ', $linkText);
-                        $items = $this->getLabelAndPageNumber($linkText, $href);
-
-                        foreach ($items as $item) {
-                            $div = $this->createDivBlock($dom, $item, $leftValue, $currentTop, $class);
-                            $fragment->appendChild($div);
-                            $currentTop += 36;
-                        }
+                    foreach ($items as $item) {
+                        $div = $this->createDivBlock($dom, $item, $leftValue, $currentTop, $class);
+                        $fragment->appendChild($div);
+                        $currentTop += 36;
                     }
-
-                    $pTag->parentNode->replaceChild($fragment, $pTag);
                 }
+
+                $pTag->parentNode->replaceChild($fragment, $pTag);
+
+            // CASE 2: No dots, but two <a> tags (label + page)
+            } elseif ($aTags->length === 2) {
+                $hasTOC = true;
+                $label = trim($aTags->item(0)->textContent);
+                $pageText = trim($aTags->item(1)->textContent);
+                $href = $aTags->item(1)->getAttribute('href');
+
+                // Extract numeric page (if available)
+                if (preg_match('/(\d+)/', $pageText, $match)) {
+                    $page = (int) $match[1];
+                } else {
+                    $page = 0;
+                }
+
+                $style = $pTag->getAttribute('style');
+                preg_match('/top:\s*([\d\.]+)px/', $style, $topMatch);
+                preg_match('/left:\s*([\d\.]+)px/', $style, $leftMatch);
+
+                $topValue = isset($topMatch[1]) ? (float) $topMatch[1] : 0;
+                $leftValue = isset($leftMatch[1]) ? (float) $leftMatch[1] : 0;
+
+                $item = [
+                    'label' => $label,
+                    'page'  => $page,
+                    'href'  => $href,
+                ];
+
+                $div = $this->createDivBlock($dom, $item, $leftValue, $topValue, $pTag->getAttribute('class') ?: 'ft01');
+                $pTag->parentNode->replaceChild($div, $pTag);
             }
         }
 
@@ -59,6 +84,7 @@ class TOCDotAlignAction
 
         return $dom;
     }
+
 
     private function getLabelAndPageNumber($textContent, $href)
     {
