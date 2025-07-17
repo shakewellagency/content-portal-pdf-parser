@@ -98,7 +98,7 @@ class BatchParserJob implements ShouldQueue
 
 
             if ($renditionPage) {
-                Log::warning('Rendition Page TOC', [
+                Log::warning("Rendition Page TOC page:{$page}", [
                     'content' => $renditionPage->content,
                 ]);
                 
