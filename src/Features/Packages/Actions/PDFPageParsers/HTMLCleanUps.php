@@ -23,7 +23,7 @@ class HTMLCleanUps
         @$dom->loadHTML($htmlString);
 
         
-        $dom = (new TOCDotAlignAction)->execute($dom, $renditionPage);
+        // $dom = (new TOCDotAlignAction)->execute($dom, $renditionPage);
         $dom = (new RemoveHRAction)->execute($dom);
         $dom = (new AdjustPaddingTopAction)->execute($dom);
         $dom = (new AddUnderlineBoxAction)->execute($dom);

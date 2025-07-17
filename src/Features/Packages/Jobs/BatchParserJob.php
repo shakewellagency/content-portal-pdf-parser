@@ -98,10 +98,6 @@ class BatchParserJob implements ShouldQueue
 
 
             if ($renditionPage) {
-                Log::warning("Rendition Page TOC page:{$page}", [
-                    'content' => $renditionPage->content,
-                ]);
-                
                 (new PageAssetDataIDAction)->execute($renditionPage);
                 (new PageDeepLinkAction)->execute($renditionPage);
                 (new PageFontColorATagAction)->execute($renditionPage);
