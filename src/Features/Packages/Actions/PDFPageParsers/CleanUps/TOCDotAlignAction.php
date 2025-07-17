@@ -16,8 +16,8 @@ class TOCDotAlignAction
             $textContent = trim($pTag->textContent);
             $aTags = $pTag->getElementsByTagName('a');
 
-            // ✅ Handle Standard TOC (from copy version – correct logic)
-            if ($aTags->length > 0 && preg_match('/\.{5,}/', $textContent)) {
+            // Standard TOC format with dots
+            if (preg_match('/\.{5,}/', $textContent)) {
                 $hasTOC = true;
                 $fragment = $this->handleStandardTOC($dom, $pTag, $aTags);
                 if ($fragment) {
@@ -25,7 +25,7 @@ class TOCDotAlignAction
                 }
             }
 
-            // ✅ Handle Alternate TOC (already working)
+            // Alternate TOC format: one <a> tag with embedded label + page (e.g., "TITLE PAGE .......... TP-1")
             elseif ($aTags->length === 1 && preg_match('/\.{5,}/', $aTags->item(0)->textContent)) {
                 $hasTOC = true;
                 $fragment = $this->handleAlternateTOC($dom, $pTag, $aTags->item(0));
@@ -42,9 +42,6 @@ class TOCDotAlignAction
         return $dom;
     }
 
-    /**
-     * ✅ Uses correct working logic from TOCDotAlignActioncopy
-     */
     protected function handleStandardTOC($dom, $pTag, $aTags)
     {
         $class = $pTag->getAttribute('class') ?: 'ft01';
@@ -61,7 +58,7 @@ class TOCDotAlignAction
         foreach ($aTags as $aTag) {
             $linkText = str_replace("\u{A0}", ' ', $aTag->textContent);
             $href = $aTag->getAttribute('href');
-            $items = $this->getStandardLabelAndPageNumber($linkText, $href);
+            $items = $this->getLabelAndPageNumber($linkText, $href);
 
             foreach ($items as $item) {
                 $div = $this->createDivBlock($dom, $item, $leftValue, $currentTop, $class);
@@ -73,9 +70,6 @@ class TOCDotAlignAction
         return $fragment;
     }
 
-    /**
-     * ✅ Already working alternate TOC logic
-     */
     protected function handleAlternateTOC($dom, $pTag, $aTag)
     {
         $class = $pTag->getAttribute('class') ?: 'ft01';
@@ -88,9 +82,10 @@ class TOCDotAlignAction
 
         $linkText = str_replace("\u{A0}", ' ', $aTag->textContent);
         $href = $aTag->getAttribute('href');
-        $items = $this->getAlternateLabelAndPageNumber($linkText, $href);
+        $items = $this->getLabelAndPageNumber($linkText, $href);
 
         if (empty($items)) {
+            // fallback if no dots/page match — treat as raw line
             $items[] = [
                 'label' => trim($linkText),
                 'page' => '',
@@ -108,40 +103,20 @@ class TOCDotAlignAction
         return $fragment;
     }
 
-    /**
-     * ✅ Standard TOC: "1. Introduction ............ 3"
-     * Uses original working regex logic
-     */
-    private function getStandardLabelAndPageNumber($textContent, $href)
+    private function getLabelAndPageNumber($textContent, $href)
     {
         $results = [];
 
-        preg_match_all('/(.*?)\.{5,}\s*(\d+)/', $textContent, $matches, PREG_SET_ORDER);
-
-        foreach ($matches as $match) {
-            $results[] = [
-                'label' => trim($match[1]),
-                'page'  => (int) $match[2],
-                'href'  => $href,
-            ];
-        }
-
-        return $results;
-    }
-
-    /**
-     * ✅ Alternate TOC: e.g., "TITLE PAGE ........ TP-1"
-     */
-    private function getAlternateLabelAndPageNumber($textContent, $href)
-    {
-        $results = [];
-
+        // Accepts TP-1, TOC-1, JC1-1, APPENDIX A-1, etc.
         preg_match_all('/^(.*?)\.{5,}\s*([A-Z0-9\- ]{2,})$/', $textContent, $matches, PREG_SET_ORDER);
 
         foreach ($matches as $match) {
+            $label = trim($match[1]);
+            $page = trim($match[2]);
+
             $results[] = [
-                'label' => trim($match[1]),
-                'page'  => trim($match[2]),
+                'label' => $label,
+                'page'  => $page,
                 'href'  => $href,
             ];
         }
@@ -149,9 +124,6 @@ class TOCDotAlignAction
         return $results;
     }
 
-    /**
-     * Reused div creation block
-     */
     private function createDivBlock($dom, $item, $leftValue, $topValue, $class)
     {
         $label = htmlspecialchars($item['label']);
