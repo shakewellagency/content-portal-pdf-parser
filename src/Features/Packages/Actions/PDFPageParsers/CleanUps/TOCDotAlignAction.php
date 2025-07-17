@@ -16,19 +16,19 @@ class TOCDotAlignAction
             $textContent = trim($pTag->textContent);
             $aTags = $pTag->getElementsByTagName('a');
 
-            // Case 1: Multiple <a> tags with dots (multi-link TOC)
-            if ($aTags->length > 1 && preg_match('/\.{5,}/', $textContent)) {
+            // ✅ Handle Standard TOC (from copy version – correct logic)
+            if ($aTags->length > 0 && preg_match('/\.{5,}/', $textContent)) {
                 $hasTOC = true;
-                $fragment = $this->handleMultiLinksTOC($dom, $pTag, $aTags);
+                $fragment = $this->handleStandardTOC($dom, $pTag, $aTags);
                 if ($fragment) {
                     $pTag->parentNode->replaceChild($fragment, $pTag);
                 }
             }
 
-            // Case 2: Single <a> tag with label + dots + page (single-line TOC)
+            // ✅ Handle Alternate TOC (already working)
             elseif ($aTags->length === 1 && preg_match('/\.{5,}/', $aTags->item(0)->textContent)) {
                 $hasTOC = true;
-                $fragment = $this->handleSingleLinkTOC($dom, $pTag, $aTags->item(0));
+                $fragment = $this->handleAlternateTOC($dom, $pTag, $aTags->item(0));
                 if ($fragment) {
                     $pTag->parentNode->replaceChild($fragment, $pTag);
                 }
@@ -42,8 +42,10 @@ class TOCDotAlignAction
         return $dom;
     }
 
-    // --- HANDLER FOR MULTIPLE LINKS IN A SINGLE <p> ---
-    protected function handleMultiLinksTOC($dom, $pTag, $aTags)
+    /**
+     * ✅ Uses correct working logic from TOCDotAlignActioncopy
+     */
+    protected function handleStandardTOC($dom, $pTag, $aTags)
     {
         $class = $pTag->getAttribute('class') ?: 'ft01';
         $style = $pTag->getAttribute('style');
@@ -59,7 +61,7 @@ class TOCDotAlignAction
         foreach ($aTags as $aTag) {
             $linkText = str_replace("\u{A0}", ' ', $aTag->textContent);
             $href = $aTag->getAttribute('href');
-            $items = $this->getLabelAndPageNumberNumeric($linkText, $href);
+            $items = $this->getStandardLabelAndPageNumber($linkText, $href);
 
             foreach ($items as $item) {
                 $div = $this->createDivBlock($dom, $item, $leftValue, $currentTop, $class);
@@ -71,8 +73,10 @@ class TOCDotAlignAction
         return $fragment;
     }
 
-    // --- HANDLER FOR SINGLE LINK IN A <p> ---
-    protected function handleSingleLinkTOC($dom, $pTag, $aTag)
+    /**
+     * ✅ Already working alternate TOC logic
+     */
+    protected function handleAlternateTOC($dom, $pTag, $aTag)
     {
         $class = $pTag->getAttribute('class') ?: 'ft01';
         $style = $pTag->getAttribute('style');
@@ -84,13 +88,13 @@ class TOCDotAlignAction
 
         $linkText = str_replace("\u{A0}", ' ', $aTag->textContent);
         $href = $aTag->getAttribute('href');
-        $items = $this->getLabelAndPageNumberAlpha($linkText, $href);
+        $items = $this->getAlternateLabelAndPageNumber($linkText, $href);
 
         if (empty($items)) {
             $items[] = [
                 'label' => trim($linkText),
-                'page'  => '',
-                'href'  => $href,
+                'page' => '',
+                'href' => $href,
             ];
         }
 
@@ -104,10 +108,14 @@ class TOCDotAlignAction
         return $fragment;
     }
 
-    // Matches: "Label ......... 3" (numeric page number)
-    private function getLabelAndPageNumberNumeric($textContent, $href)
+    /**
+     * ✅ Standard TOC: "1. Introduction ............ 3"
+     * Uses original working regex logic
+     */
+    private function getStandardLabelAndPageNumber($textContent, $href)
     {
         $results = [];
+
         preg_match_all('/(.*?)\.{5,}\s*(\d+)/', $textContent, $matches, PREG_SET_ORDER);
 
         foreach ($matches as $match) {
@@ -121,10 +129,13 @@ class TOCDotAlignAction
         return $results;
     }
 
-    // Matches: "TITLE PAGE ......... TP-1" or similar
-    private function getLabelAndPageNumberAlpha($textContent, $href)
+    /**
+     * ✅ Alternate TOC: e.g., "TITLE PAGE ........ TP-1"
+     */
+    private function getAlternateLabelAndPageNumber($textContent, $href)
     {
         $results = [];
+
         preg_match_all('/^(.*?)\.{5,}\s*([A-Z0-9\- ]{2,})$/', $textContent, $matches, PREG_SET_ORDER);
 
         foreach ($matches as $match) {
@@ -138,6 +149,9 @@ class TOCDotAlignAction
         return $results;
     }
 
+    /**
+     * Reused div creation block
+     */
     private function createDivBlock($dom, $item, $leftValue, $topValue, $class)
     {
         $label = htmlspecialchars($item['label']);
@@ -150,6 +164,7 @@ class TOCDotAlignAction
 
         $a = $dom->createElement('a');
         $a->setAttribute('href', $href);
+
         $pLabel = $dom->createElement('p', $label);
         $a->appendChild($pLabel);
 
