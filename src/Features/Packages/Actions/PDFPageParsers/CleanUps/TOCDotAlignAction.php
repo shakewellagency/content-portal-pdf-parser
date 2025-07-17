@@ -16,19 +16,19 @@ class TOCDotAlignAction
             $textContent = trim($pTag->textContent);
             $aTags = $pTag->getElementsByTagName('a');
 
-            // Standard TOC format with dots
-            if (preg_match('/\.{5,}/', $textContent)) {
+            // Case 1: Multiple <a> tags with dots (multi-link TOC)
+            if ($aTags->length > 1 && preg_match('/\.{5,}/', $textContent)) {
                 $hasTOC = true;
-                $fragment = $this->handleStandardTOC($dom, $pTag, $aTags);
+                $fragment = $this->handleMultiLinksTOC($dom, $pTag, $aTags);
                 if ($fragment) {
                     $pTag->parentNode->replaceChild($fragment, $pTag);
                 }
             }
 
-            // Alternate TOC format: one <a> tag with embedded label + page (e.g., "TITLE PAGE .......... TP-1")
+            // Case 2: Single <a> tag with label + dots + page (single-line TOC)
             elseif ($aTags->length === 1 && preg_match('/\.{5,}/', $aTags->item(0)->textContent)) {
                 $hasTOC = true;
-                $fragment = $this->handleAlternateTOC($dom, $pTag, $aTags->item(0));
+                $fragment = $this->handleSingleLinkTOC($dom, $pTag, $aTags->item(0));
                 if ($fragment) {
                     $pTag->parentNode->replaceChild($fragment, $pTag);
                 }
@@ -42,7 +42,8 @@ class TOCDotAlignAction
         return $dom;
     }
 
-    protected function handleStandardTOC($dom, $pTag, $aTags)
+    // --- HANDLER FOR MULTIPLE LINKS IN A SINGLE <p> ---
+    protected function handleMultiLinksTOC($dom, $pTag, $aTags)
     {
         $class = $pTag->getAttribute('class') ?: 'ft01';
         $style = $pTag->getAttribute('style');
@@ -58,7 +59,7 @@ class TOCDotAlignAction
         foreach ($aTags as $aTag) {
             $linkText = str_replace("\u{A0}", ' ', $aTag->textContent);
             $href = $aTag->getAttribute('href');
-            $items = $this->getLabelAndPageNumber($linkText, $href);
+            $items = $this->getLabelAndPageNumberNumeric($linkText, $href);
 
             foreach ($items as $item) {
                 $div = $this->createDivBlock($dom, $item, $leftValue, $currentTop, $class);
@@ -70,7 +71,8 @@ class TOCDotAlignAction
         return $fragment;
     }
 
-    protected function handleAlternateTOC($dom, $pTag, $aTag)
+    // --- HANDLER FOR SINGLE LINK IN A <p> ---
+    protected function handleSingleLinkTOC($dom, $pTag, $aTag)
     {
         $class = $pTag->getAttribute('class') ?: 'ft01';
         $style = $pTag->getAttribute('style');
@@ -82,14 +84,13 @@ class TOCDotAlignAction
 
         $linkText = str_replace("\u{A0}", ' ', $aTag->textContent);
         $href = $aTag->getAttribute('href');
-        $items = $this->getLabelAndPageNumber($linkText, $href);
+        $items = $this->getLabelAndPageNumberAlpha($linkText, $href);
 
         if (empty($items)) {
-            // fallback if no dots/page match — treat as raw line
             $items[] = [
                 'label' => trim($linkText),
-                'page' => '',
-                'href' => $href,
+                'page'  => '',
+                'href'  => $href,
             ];
         }
 
@@ -103,20 +104,33 @@ class TOCDotAlignAction
         return $fragment;
     }
 
-    private function getLabelAndPageNumber($textContent, $href)
+    // Matches: "Label ......... 3" (numeric page number)
+    private function getLabelAndPageNumberNumeric($textContent, $href)
     {
         $results = [];
+        preg_match_all('/(.*?)\.{5,}\s*(\d+)/', $textContent, $matches, PREG_SET_ORDER);
 
-        // Accepts TP-1, TOC-1, JC1-1, APPENDIX A-1, etc.
+        foreach ($matches as $match) {
+            $results[] = [
+                'label' => trim($match[1]),
+                'page'  => (int) $match[2],
+                'href'  => $href,
+            ];
+        }
+
+        return $results;
+    }
+
+    // Matches: "TITLE PAGE ......... TP-1" or similar
+    private function getLabelAndPageNumberAlpha($textContent, $href)
+    {
+        $results = [];
         preg_match_all('/^(.*?)\.{5,}\s*([A-Z0-9\- ]{2,})$/', $textContent, $matches, PREG_SET_ORDER);
 
         foreach ($matches as $match) {
-            $label = trim($match[1]);
-            $page = trim($match[2]);
-
             $results[] = [
-                'label' => $label,
-                'page'  => $page,
+                'label' => trim($match[1]),
+                'page'  => trim($match[2]),
                 'href'  => $href,
             ];
         }
@@ -136,7 +150,6 @@ class TOCDotAlignAction
 
         $a = $dom->createElement('a');
         $a->setAttribute('href', $href);
-
         $pLabel = $dom->createElement('p', $label);
         $a->appendChild($pLabel);
 
