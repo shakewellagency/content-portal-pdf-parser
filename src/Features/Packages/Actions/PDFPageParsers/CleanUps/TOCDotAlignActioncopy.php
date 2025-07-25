@@ -2,16 +2,19 @@
 
 namespace Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\CleanUps;
 
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class TOCDotAlignActioncopy
 {
 
     public function execute($dom, $renditionPage)
-    {
+    {   
+
         $hasTOC = false;
         $xpath = new \DOMXPath($dom);
         $pTags = $xpath->query('//p');
+
+
 
         foreach ($pTags as $pTag) {
             $textContent = $pTag->textContent;
