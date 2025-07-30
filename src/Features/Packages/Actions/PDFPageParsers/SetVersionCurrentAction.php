@@ -40,5 +40,4 @@ class SetVersionCurrentAction
             return $rendition->fresh();
         });
     }
-
 }
