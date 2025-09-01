@@ -222,7 +222,7 @@ Contributions are welcome! Please ensure:
 
 ## Security
 
-If you discover any security vulnerabilities, please email kylyn.l@shakewell.agency instead of using the issue tracker.
+If you discover any security vulnerabilities, please email developers@shakewell.agency instead of using the issue tracker.
 
 ## Changelog
 
