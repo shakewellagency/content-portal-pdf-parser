@@ -31,3 +31,18 @@ psalm.xml
 testbench.yaml
 /docs
 /coverage
+
+# Development Tools
+.claude/
+claude-*.md
+ai-*.md
+*.ai.md
+.anthropic/
+.assistant/
+
+# Temporary Files
+*.tmp
+*.temp
+/tmp
+.DS_Store
+Thumbs.db
