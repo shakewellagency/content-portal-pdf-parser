@@ -42,10 +42,7 @@ class SendEmailNotificationListener
         };
 
         $emails = [
-            'kylyn.l@shakewell.agency',
-            'brett.v@shakewell.agency',
-            'michael.i@shakewell.agency',
-            'kevin.c@shakewell.agency'
+            'developers@shakewell.agency'
         ];
         
         $destinations = [];
