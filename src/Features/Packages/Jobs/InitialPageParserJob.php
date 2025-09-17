@@ -9,6 +9,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\CoverPhotoAction;
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\ParseContentValueAction;
 use Shakewellagency\ContentPortalPdfParser\Features\Packages\Actions\PDFPageParsers\ParseTOCAction;
 
 class InitialPageParserJob implements ShouldQueue
@@ -48,6 +49,9 @@ class InitialPageParserJob implements ShouldQueue
             $rendition,
             $this->package
         );
+
+        /** run content_value parser after the outline is removed */
+        (new ParseContentValueAction)->execute($this->renditionPage);
 
         LoggerInfo("package:{$this->package->id} - Successfully parsed the 1st page for outline and default coverphoto", [
             'package' => $this->package->toArray(),
