@@ -2,6 +2,14 @@
 
 All notable changes to `content-portal-pdf-parser` will be documented in this file.
 
+## 1.0.2 - 2025-10-31
+
+### Fixed
+- Fixed PDF page splitting issue where all pages contained the entire PDF instead of individual pages
+- Updated glob pattern in PDFPageParserAction to match only files for the specific page being processed
+- Added page-specific prefix filtering to prevent cross-page file contamination
+- Added detailed logging to track file processing for debugging purposes
+
 ## 1.0.0 - 2025-01-09
 
 ### Added
