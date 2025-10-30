@@ -35,7 +35,18 @@ class PDFPageParserAction
         }
 
         $tempDirectory = dirname($tempHtml);
-        $files = glob($tempDirectory . "/{$tempNamePrefix}*.*");
+        // Match only files for this specific page to avoid picking up files from other pages
+        $pageSpecificPrefix = basename($tempHtmlPath, '.html');
+        $files = glob($tempDirectory . "/{$pageSpecificPrefix}*");
+
+        Log::info("PDF Page Parser - Processing page {$page}", [
+            'package_id' => $package->id,
+            'page' => $page,
+            'temp_path' => $tempHtmlPath,
+            'page_specific_prefix' => $pageSpecificPrefix,
+            'files_found' => count($files),
+            'files' => array_map('basename', $files),
+        ]);
 
         foreach ($files as $file) {
             $filename = basename($file);
