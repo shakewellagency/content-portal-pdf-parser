@@ -52,7 +52,7 @@ class ParsingStartedMail extends Mailable
             markdown: $markdown,
             with: [
                 'publicationNo' => $this->version->publication->publication_no,
-                'versionInfo' => $this->version->version_meta,
+                'versionInfo' => $this->version->version_meta ?? [],
                 'startedDate' => $this->package->started_at,
             ]
         );
