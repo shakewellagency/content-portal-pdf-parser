@@ -110,7 +110,7 @@ class BatchParserJob implements ShouldQueue
                 (new PageFontColorATagAction)->execute($renditionPage);
                 (new ExtractHeightWidthAction)->execute($renditionPage);
                 (new HTMLCleanUps)->execute($renditionPage);
-                (new ParseContentValueAction)->execute($renditionPage);
+                (new ParseContentValueAction)->execute($renditionPage); // this causes an issue on page 1 since the outline is not removed yet
                 $renditionPage->refresh();
             }
 
