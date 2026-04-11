@@ -22,5 +22,18 @@ return [
         'rendition_type_enum' => '', //App\Features\Renditions\Enums\RenditionTypeEnum::class,
     ],
     'timezone' => 'Australia/Sydney',
-    'emails' => fn() => app('parser.emails'),
+    'emails' => fn () => app('parser.emails'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | PDF linearization (Fast Web View) — qpdf + S3 linearized_file_path
+    |--------------------------------------------------------------------------
+    |
+    | LinearizePackagePdfJob runs after parse is triggered. Requires qpdf on workers.
+    | Use ResolvesLinearizedFilePath on package_model so file_path resolves to linearized when set.
+    |
+    */
+    'linearize_on_parse' => env('PDF_LINEARIZE_ON_PARSE', true),
+    'qpdf_binary' => env('QPDF_BINARY', 'qpdf'),
+    'qpdf_timeout_seconds' => env('QPDF_TIMEOUT', 7200),
 ];

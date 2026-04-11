@@ -2,6 +2,14 @@
 
 All notable changes to `content-portal-pdf-parser` will be documented in this file.
 
+## 1.0.3 - 2026-04-11
+
+### Added
+- Optional PDF linearization (Fast Web View): `LinearizePackagePdfJob` and `QpdfLinearizeService` (requires `qpdf` on queue workers), dispatched from `PDFParse::execute` when `linearize_on_parse` is enabled.
+- `linearized_file_path` column migration under `databases/migrations/package_updates`, auto-loaded via `ParserServiceProvider::loadMigrationsFrom`.
+- `ResolvesLinearizedFilePath` trait for the host `package_model` so `file_path` resolves to the linearized object key when set.
+- Config keys: `linearize_on_parse`, `qpdf_binary`, `qpdf_timeout_seconds`; dependency `symfony/process`.
+
 ## 1.0.2 - 2025-10-31
 
 ### Fixed
