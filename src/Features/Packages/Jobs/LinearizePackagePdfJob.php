@@ -12,9 +12,11 @@ class LinearizePackagePdfJob implements ShouldQueue
 {
     use Queueable;
 
-    public int $tries = 1;
+    public int $tries = 2;
 
     public int $timeout = 7200;
+
+    public int $backoff = 60;
 
     public function __construct(
         public string $packageId
@@ -76,8 +78,8 @@ class LinearizePackagePdfJob implements ShouldQueue
             return;
         }
 
-        $tmpIn = tempnam(sys_get_temp_dir(), 'pdf_in_').'.pdf';
-        $tmpOut = tempnam(sys_get_temp_dir(), 'pdf_lin_').'.pdf';
+        $tmpIn = $this->createTempFile('pdf_in_');
+        $tmpOut = $this->createTempFile('pdf_lin_');
         try {
             file_put_contents($tmpIn, $contents);
             $qpdf->linearizeFile($tmpIn, $tmpOut);
@@ -89,7 +91,6 @@ class LinearizePackagePdfJob implements ShouldQueue
 
             $package->forceFill([
                 'linearized_file_path' => $key,
-                'pdf_viewer_v2' => true,
             ])->save();
 
             Log::info('LinearizePackagePdfJob: successfully linearized package', [
@@ -111,6 +112,16 @@ class LinearizePackagePdfJob implements ShouldQueue
                 'tmp_out' => $tmpOut,
             ]);
         }
+    }
+
+    private function createTempFile(string $prefix): string
+    {
+        $path = tempnam(sys_get_temp_dir(), $prefix);
+        if ($path === false) {
+            throw new \RuntimeException('Unable to create temporary file');
+        }
+
+        return $path;
     }
 
     private function linearizedKey(string $originalKey): string
