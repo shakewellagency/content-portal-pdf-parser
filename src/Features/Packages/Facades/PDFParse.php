@@ -12,12 +12,12 @@ class PDFParse
     public static function execute($package, $version)
     {
         event(new ParsingTriggerEvent($package, $version));
+
+        $chain = [new PageParserJob($package, $version)];
         if (config('shakewell-parser.linearize_on_parse', true)) {
-            LinearizePackagePdfJob::dispatch((string) $package->getKey());
+            $chain[] = new LinearizePackagePdfJob((string) $package->getKey());
         }
 
-        PackageInitializationJob::withChain([
-            new PageParserJob($package, $version),
-        ])->dispatch($package, $version);
+        PackageInitializationJob::withChain($chain)->dispatch($package, $version);
     }
 }

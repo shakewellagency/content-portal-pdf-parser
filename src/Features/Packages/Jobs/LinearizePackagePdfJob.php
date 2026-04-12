@@ -68,9 +68,8 @@ class LinearizePackagePdfJob implements ShouldQueue
         }
 
         $disk = config('shakewell-parser.s3');
-        $contents = Storage::disk($disk)->get($originalPath);
-        if ($contents === null || $contents === '') {
-            Log::warning('LinearizePackagePdfJob: empty or missing S3 object', [
+        if (! Storage::disk($disk)->exists($originalPath)) {
+            Log::warning('LinearizePackagePdfJob: S3 object does not exist', [
                 'package_id' => $this->packageId,
                 'file_path' => $originalPath,
             ]);
@@ -81,13 +80,21 @@ class LinearizePackagePdfJob implements ShouldQueue
         $tmpIn = $this->createTempFile('pdf_in_');
         $tmpOut = $this->createTempFile('pdf_lin_');
         try {
-            file_put_contents($tmpIn, $contents);
+            $this->streamDownload($disk, $originalPath, $tmpIn);
+
+            if (filesize($tmpIn) === 0) {
+                Log::warning('LinearizePackagePdfJob: empty S3 object', [
+                    'package_id' => $this->packageId,
+                    'file_path' => $originalPath,
+                ]);
+
+                return;
+            }
+
             $qpdf->linearizeFile($tmpIn, $tmpOut);
 
             $key = $this->linearizedKey((string) $originalPath);
-            Storage::disk($disk)->put($key, file_get_contents($tmpOut), [
-                'ContentType' => 'application/pdf',
-            ]);
+            $this->streamUpload($disk, $key, $tmpOut);
 
             $package->forceFill([
                 'linearized_file_path' => $key,
@@ -111,6 +118,54 @@ class LinearizePackagePdfJob implements ShouldQueue
                 'tmp_in' => $tmpIn,
                 'tmp_out' => $tmpOut,
             ]);
+        }
+    }
+
+    private function streamDownload(string $disk, string $remotePath, string $localPath): void
+    {
+        $remote = Storage::disk($disk)->readStream($remotePath);
+        if ($remote === null || $remote === false) {
+            throw new \RuntimeException("Unable to open read stream for {$remotePath}");
+        }
+
+        $local = fopen($localPath, 'wb');
+        if ($local === false) {
+            fclose($remote);
+            throw new \RuntimeException("Unable to open local file for writing: {$localPath}");
+        }
+
+        try {
+            if (stream_copy_to_stream($remote, $local) === false) {
+                throw new \RuntimeException("Failed to stream {$remotePath} to {$localPath}");
+            }
+        } finally {
+            if (is_resource($local)) {
+                fclose($local);
+            }
+            if (is_resource($remote)) {
+                fclose($remote);
+            }
+        }
+    }
+
+    private function streamUpload(string $disk, string $remotePath, string $localPath): void
+    {
+        $local = fopen($localPath, 'rb');
+        if ($local === false) {
+            throw new \RuntimeException("Unable to open local file for reading: {$localPath}");
+        }
+
+        try {
+            $ok = Storage::disk($disk)->writeStream($remotePath, $local, [
+                'ContentType' => 'application/pdf',
+            ]);
+            if ($ok === false) {
+                throw new \RuntimeException("Failed to upload {$localPath} to {$remotePath}");
+            }
+        } finally {
+            if (is_resource($local)) {
+                fclose($local);
+            }
         }
     }
 

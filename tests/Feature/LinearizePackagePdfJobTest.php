@@ -97,6 +97,25 @@ it('returns early when file_path is not set', function () {
         ->once();
 });
 
+it('returns early when the S3 object does not exist', function () {
+    FakePackageModel::create([
+        'id' => 'pkg-missing',
+        'file_type' => 'pdf',
+        'file_path' => 'packages/pkg-missing/absent.pdf',
+    ]);
+    Log::spy();
+
+    $qpdf = Mockery::mock(QpdfLinearizeService::class);
+    $qpdf->shouldReceive('isAvailable')->andReturn(true);
+    $qpdf->shouldNotReceive('linearizeFile');
+
+    (new LinearizePackagePdfJob('pkg-missing'))->handle($qpdf);
+
+    Log::shouldHaveReceived('warning')
+        ->withArgs(fn ($msg) => $msg === 'LinearizePackagePdfJob: S3 object does not exist')
+        ->once();
+});
+
 it('returns early when qpdf is not available', function () {
     FakePackageModel::create([
         'id' => 'pkg-3',
