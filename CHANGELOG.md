@@ -2,6 +2,16 @@
 
 All notable changes to `content-portal-pdf-parser` will be documented in this file.
 
+## 1.0.6 - 2026-04-12
+
+### Fixed
+- `LinearizePackagePdfJob` is now chained after `PackageInitializationJob` and `PageParserJob` instead of being dispatched concurrently. This eliminates the race where linearization could run before `file_path` was finalized.
+- PDF content is now streamed from and to S3 via `readStream()`/`writeStream()` instead of being loaded into memory with `Storage::get()`/`put()`, preventing worker OOM on large PDFs.
+- The missing-S3-object guard now uses `Storage::exists()` before attempting a download.
+
+### Added
+- Pest coverage for chain ordering (`PDFParse::execute` includes/excludes `LinearizePackagePdfJob` based on the `linearize_on_parse` config) and for the new missing-S3-object branch.
+
 ## 1.0.5 - 2026-04-12
 
 ### Added
