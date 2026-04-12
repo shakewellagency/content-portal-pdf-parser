@@ -16,6 +16,7 @@ A powerful Laravel package for processing PDF documents into structured renditio
 - 🎯 **Event-Driven Architecture** - Event system for parsing lifecycle management
 - 🔧 **Configurable Models** - Flexible model configuration for integration with existing applications
 - 📄 **Page Extraction** - Individual page processing with asset management
+- ⚡ **Fast Web View Linearization** - Optional qpdf-based PDF linearization for progressive streaming
 
 ## Installation
 
@@ -56,6 +57,11 @@ Add the following environment variables to your `.env` file:
 ```env
 SHAKEWELL_PARSER_ENV=production
 SHAKEWELL_PARSER_S3=s3
+
+# Optional: PDF linearization (Fast Web View)
+PDF_LINEARIZE_ON_PARSE=true
+QPDF_BINARY=qpdf
+QPDF_TIMEOUT=7200
 ```
 
 ### Model Configuration
@@ -166,6 +172,7 @@ The package creates the following database tables:
 - Laravel ^11.9
 - Queue system configured (Redis/Database/etc.)
 - AWS S3 access for file storage
+- `qpdf` binary on queue workers (only if `PDF_LINEARIZE_ON_PARSE=true`)
 
 ## Job Queue Configuration
 
@@ -176,6 +183,20 @@ php artisan queue:work
 ```
 
 The package uses long-running jobs (timeout: 7200 seconds) for PDF processing.
+
+## PDF Linearization (Fast Web View)
+
+When `PDF_LINEARIZE_ON_PARSE=true`, `PDFParse::execute` dispatches a `LinearizePackagePdfJob` that downloads the source PDF from S3, runs `qpdf --linearize`, and uploads the linearized copy back to S3 under `linearized_file_path` on the `packages` table. The migration that adds this column is auto-loaded by `ParserServiceProvider`.
+
+To have `file_path` transparently resolve to the linearized object key when one is present, apply the `ResolvesLinearizedFilePath` trait to your host `package_model`.
+
+Config keys (in `config/shakewell-parser.php`):
+
+- `linearize_on_parse` — toggle the feature (env: `PDF_LINEARIZE_ON_PARSE`)
+- `qpdf_binary` — absolute path or name of the qpdf binary (env: `QPDF_BINARY`)
+- `qpdf_timeout_seconds` — qpdf process timeout (env: `QPDF_TIMEOUT`)
+
+If `qpdf` is not available on the worker, the job logs a warning and exits without failing the parse pipeline.
 
 ## Testing
 

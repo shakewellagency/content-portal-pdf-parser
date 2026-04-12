@@ -2,7 +2,7 @@
 
 All notable changes to `content-portal-pdf-parser` will be documented in this file.
 
-## 1.0.3 - 2026-04-11
+## 1.0.4 - 2026-04-12
 
 ### Added
 - Optional PDF linearization (Fast Web View): `LinearizePackagePdfJob` and `QpdfLinearizeService` (requires `qpdf` on queue workers), dispatched from `PDFParse::execute` when `linearize_on_parse` is enabled.
