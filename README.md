@@ -169,7 +169,7 @@ The package creates the following database tables:
 ## Requirements
 
 - PHP ^8.1
-- Laravel ^11.9
+- Laravel ^11.9, ^12.0, or ^13.0
 - Queue system configured (Redis/Database/etc.)
 - AWS S3 access for file storage
 - `qpdf` binary on queue workers (only if `PDF_LINEARIZE_ON_PARSE=true`)
@@ -188,7 +188,18 @@ The package uses long-running jobs (timeout: 7200 seconds) for PDF processing.
 
 When `PDF_LINEARIZE_ON_PARSE=true`, `PDFParse::execute` dispatches a `LinearizePackagePdfJob` that downloads the source PDF from S3, runs `qpdf --linearize`, and uploads the linearized copy back to S3 under `linearized_file_path` on the `packages` table. The migration that adds this column is auto-loaded by `ParserServiceProvider`.
 
-To have `file_path` transparently resolve to the linearized object key when one is present, apply the `ResolvesLinearizedFilePath` trait to your host `package_model`.
+To have `file_path` transparently resolve to the linearized object key when one is present, apply the `ResolvesLinearizedFilePath` trait to your host `package_model`:
+
+```php
+use Shakewellagency\ContentPortalPdfParser\Features\Packages\Traits\ResolvesLinearizedFilePath;
+
+class Package extends Model
+{
+    use ResolvesLinearizedFilePath;
+}
+```
+
+Reads of `$package->file_path` then return `linearized_file_path` when set. The raw value is still available via `$package->getOriginalFilePath()`.
 
 Config keys (in `config/shakewell-parser.php`):
 

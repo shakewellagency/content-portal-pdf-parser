@@ -2,6 +2,20 @@
 
 All notable changes to `content-portal-pdf-parser` will be documented in this file.
 
+## 1.0.5 - 2026-04-12
+
+### Added
+- `ResolvesLinearizedFilePath` trait for the host `package_model`, transparently resolving `file_path` reads to the linearized object key when set.
+- Laravel 13 support (`laravel/framework: ^11.9|^12.0|^13.0`).
+- Pest test suite with `orchestra/testbench`: coverage for `ResolvesLinearizedFilePath`, `QpdfLinearizeService`, and `LinearizePackagePdfJob` guard clauses, success path, and temp-file cleanup on failure.
+
+### Fixed
+- `LinearizePackagePdfJob` was leaking empty temp files on every run because `tempnam()` return values were used after appending `.pdf`. Temp files are now used as created and cleaned up correctly.
+- `LinearizePackagePdfJob` no longer writes to the undeclared `pdf_viewer_v2` column; only `linearized_file_path` is persisted.
+
+### Changed
+- `LinearizePackagePdfJob` retries once on transient failures (`$tries = 2`, `$backoff = 60`).
+
 ## 1.0.4 - 2026-04-12
 
 ### Added
