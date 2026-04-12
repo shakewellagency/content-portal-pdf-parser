@@ -16,6 +16,8 @@ class ParserServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        $this->loadMigrationsFrom(__DIR__.'/../databases/migrations/package_updates');
+
         $this->listener();
 
         $this->publishes([
